@@ -3,6 +3,17 @@
 #include <stdio.h>
 
 int main() {
-    printf("%s\n", "Hello World!");
+
+    Window *window = platformCreatWindow("Retro", 480, 340);
+
+    while(!platformWindowShouldClose(window)) {
+
+        platformPollEvents(window);
+        platformSwapBuffers(window);
+
+        //TODO: Remove
+        break;
+    }
+
     return 0;
 }

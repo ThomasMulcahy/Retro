@@ -19,6 +19,8 @@ typedef struct _Window {
     char *title;
     int width;
     int height;
+
+    int shouldClose;
 } Window;
 
 /**
@@ -30,14 +32,19 @@ typedef struct _Window {
 Window *platformCreatWindow(char *title, int width, int height);
 
 /*
+ * Returns true if a window close event has been fired.
+ */
+int platformWindowShouldClose(Window *window);
+
+/*
  * Calling this function swaps the rendering buffers to the next buffer for drawing.
  */
-void swapBuffers(Window *window);
+void platformSwapBuffers(Window *window);
 
 /*
  * Call this event to poll the OS events for the system. This function is blocking as
  * the core loop of thie application is designed to be event based.
  */
-void pollEvents(Window *window);
+void platformPollEvents(Window *window);
 
 #endif
