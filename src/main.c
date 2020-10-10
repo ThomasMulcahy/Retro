@@ -1,19 +1,12 @@
-#include "platform/platform.h"
+#include "platform.h"
 
-#include <stdio.h>
+int main(int argc, char *argv[]) {
 
-int main() {
+    WindowOpt options = {
+        .title = "Retro",
+        .width = 450,
+        .height = 360
+    };
 
-    Window *window = platformCreatWindow("Retro", 480, 340);
-
-    while(!platformWindowShouldClose(window)) {
-
-        platformPollEvents(window);
-        platformSwapBuffers(window);
-
-        //TODO: Remove
-        break;
-    }
-
-    return 0;
+    return platformRun(&options, argc, argv);
 }
