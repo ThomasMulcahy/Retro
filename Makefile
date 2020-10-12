@@ -35,7 +35,7 @@ setup:
 	mkdir -p $(BUILD_DIR)/release
 	@echo "Setup complete."
 
-run: all
+run: debug
 	./build/retro
 
 # Clean object files from build dir

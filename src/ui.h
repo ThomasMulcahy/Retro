@@ -34,8 +34,6 @@ typedef struct _UIElement {
 /*******************************
  ****** Platfrom specific ******
  *******************************/
-void uiBuild(UIElement *element);
-
 void uiDraw(UIElement *headElement);
 
 #endif

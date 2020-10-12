@@ -22,6 +22,5 @@ int main(int argc, char *argv[]) {
         }
     };
 
-    uiBuild(&layout);
-    return platformRun(&options, argc, argv);
+    return platformRun(&options, &layout, argc, argv);
 }

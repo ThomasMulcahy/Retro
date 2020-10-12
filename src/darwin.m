@@ -4,7 +4,6 @@
 #import <MetalKit/MetalKit.h>
 
 #import "platform.h"
-#import "ui.h"
 
 typedef struct {
     matrix_float4x4 rotationMatrix;
@@ -84,7 +83,7 @@ static matrix_float4x4 rotationMatrix2D(float radians)
     }
 @end
 
-int platformRun(WindowOpt *winOptions, int argc, char *argv[]) {
+int platformRun(WindowOpt *winOptions, UIElement *headElement, int argc, char *argv[]) {
 
     // Setup application. 
     NSError* error;
@@ -162,7 +161,5 @@ int platformRun(WindowOpt *winOptions, int argc, char *argv[]) {
     [pool release];
     return EXIT_SUCCESS;
 }
-
-void uiBuild(UIElement *element){}
 
 void uiDraw(UIElement *headElement){}
