@@ -1,6 +1,6 @@
 TARGET=retro
 CC=clang
-CFLAGS=-Wall -Wextra -std=c99 -framework Cocoa -framework Metal -framework QuartzCore
+CFLAGS=-Wall -Wextra -std=c99 -lobjc -framework Cocoa -framework Metal -framework MetalKit -framework QuartzCore
 
 BUILD_DIR=build
 SRC_DIR=src
@@ -16,7 +16,7 @@ all: $(TARGET) clean
 OS := $(shell uname)
 $(TARGET): $(OBJECTS)
 	@echo "Compiling executable..."
-	$(CC) $(CFLAGS) $(OBJECTS) $(OBJC_SOURCES) -o $(BUILD_DIR)/$@
+	$(CC) $(CFLAGS) -O0 $(OBJECTS) $(OBJC_SOURCES) -o $(BUILD_DIR)/$@
 	@echo "Compilation complete."
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS)
