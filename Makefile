@@ -1,6 +1,8 @@
 TARGET=retro
 CC=clang
-CFLAGS=-Wall -Wextra -std=c99 -lobjc -framework Cocoa -framework Metal -framework MetalKit -framework QuartzCore
+CFLAGS=-std=c99
+DEBUG_FLAGS=-Wall -Wextra
+OBJC_FLAGS=-lobjc -framework Cocoa -framework Metal -framework MetalKit -framework QuartzCore
 
 BUILD_DIR=build
 SRC_DIR=src
@@ -13,10 +15,14 @@ OBJECTS=$(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
 
 all: $(TARGET) clean
 
-OS := $(shell uname)
 $(TARGET): $(OBJECTS)
-	@echo "Compiling executable..."
-	$(CC) $(CFLAGS) -O0 $(OBJECTS) $(OBJC_SOURCES) -o $(BUILD_DIR)/$@
+	@echo "Compiling executable for release..."
+	$(CC) $(CFLAGS) $(OBJC_FLAGS) -O2 $(OBJECTS) $(OBJC_SOURCES) -o $(BUILD_DIR)/release/$@
+	@echo "Compilation complete."
+
+debug: $(OBJECTS)
+	@echo "Compiling executable in debug..."
+	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(OBJC_FLAGS) -O0 $(OBJECTS) $(OBJC_SOURCES) -o $(BUILD_DIR)/$(TARGET)
 	@echo "Compilation complete."
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS)
@@ -26,6 +32,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(HEADERS)
 setup:
 	@echo "Setting up project..."
 	mkdir -p $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR)/release
 	@echo "Setup complete."
 
 run: all
