@@ -15,7 +15,10 @@ int main(int argc, char *argv[]) {
         .type = CONTAINER,
 
         .child = &(UIElement) {
-            .type = EDITOR
+            .type = EDITOR,
+
+            .width = TO_PERCENTAGE(100),
+            .height = TO_PERCENTAGE(100),
         }
     };
 
