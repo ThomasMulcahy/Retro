@@ -2,15 +2,15 @@
 
 using namespace metal;
 
-struct Uniforms
-{
-    float4x4 rotationMatrix;
-};
-
 struct VertexIn
 {
-    float4 position;
+    float2 position;
     float4 color;
+};
+
+struct UniformsIn
+{
+    float4x4 orthoMatrix;
 };
 
 struct VertexOut
@@ -19,12 +19,15 @@ struct VertexOut
     float4 color;
 };
 
-vertex VertexOut vertexFunction(device VertexIn *vertices [[buffer(0)]],
-                                constant Uniforms &uniforms [[buffer(1)]],
+vertex VertexOut vertexFunction(device VertexIn *vertices [[buffer(0)]], 
+                                device UniformsIn &uniforms [[buffer(1)]],
                                 uint vid [[vertex_id]])
 {
     VertexOut out;
-    out.position = uniforms.rotationMatrix * vertices[vid].position;
+    VertexIn vin = vertices[vid];
+    float4 pos = vector_float4(vin.position.x, vin.position.y, 0, 1);
+    float4 projPos = uniforms.orthoMatrix * pos;
+    out.position = projPos;
     out.color = vertices[vid].color;
     return out;
 }

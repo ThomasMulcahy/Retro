@@ -10,8 +10,7 @@
  * TODO: Abstract into reusable components
  ********************************************************************/
 
-#define TO_PERCENTAGE(n) ((n < 0) ? 0 : (n > 100) ? 100 : (n / 100))
-
+#define TO_PERCENTAGE(n) ((n < 0.0f) ? 0.0f : (n > 100.0f) ? 100.0f : (n / 100.0f))
  /*
   * ElementType determines how the UIElement should be handled. There
   * will be corresponding functions for each type of element, these
@@ -28,24 +27,30 @@ typedef struct _UIElement {
     // The type of the element. Used for specified drawing.
     enum ElementType type;
 
-    /* All elements contain a width and a height.
+    /* All elements contain a xPos, yPos, width, and height.
      * This is a percentage(%) in relation to the parent container, currently
      * there is only one possible tree and container.
      *
      * TODO: Add functionality for mulitple UI trees and containers.
      */
-    int width;
-    int height;
+    float xPos;
+    float yPos;
+    float width;
+    float height;
+
+    float color[3];
 
     // The child element, currently only used by the container and only one child permitted.
     struct _UIElement *child;
 } UIElement;
 
-void uiEditorDraw(UIElement element);
-
-/*******************************
- ****** Platfrom specific ******
- *******************************/
-void uiDraw(UIElement *headElement);
+/********************************************************************
+ * The following functions are to be implemented by the platforms 
+ * rendering system and SHOULD NOT be called from anywhere inside an
+ * application. 
+ * 
+ * The UI tree structure is used to define the UI, such 
+ * as style and shape of the elements.
+ ********************************************************************/
 
 #endif

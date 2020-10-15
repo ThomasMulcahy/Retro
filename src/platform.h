@@ -9,6 +9,6 @@ typedef struct _WindowOpt {
     int height;
 } WindowOpt;
 
-int platformRun(WindowOpt *winOptions, UIElement *headElement, int argc, char *argv[]);
+int platformRun(WindowOpt *winOptions, UIElement *headElement);
 
 #endif
