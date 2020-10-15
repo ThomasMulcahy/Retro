@@ -11,4 +11,6 @@ typedef struct _WindowOpt {
 
 int platformRun(WindowOpt *winOptions, UIElement *headElement);
 
+char *platformReadFile(char *path);
+
 #endif

@@ -1,11 +1,12 @@
 #import "ui.h"
+#import "platform.h"
+#import <stdio.h>
+#import <stdlib.h>
+
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
-
-#import "platform.h"
-#import "stdio.h"
 
 typedef struct _VertexIn{
     vector_float2 position;
@@ -65,6 +66,8 @@ matrix_float4x4 createOrthographicMatrix(float left, float right, float top, flo
         [commandEncoder setRenderPipelineState:mtlPipelineState];
         [commandEncoder setViewport:(MTLViewport) {0.0, 0.0, frameWidth, frameHeight, -1.0, 1.0}];
         [commandEncoder setScissorRect:(MTLScissorRect) {0.0, 0.0, frameWidth, frameHeight}];
+        [commandEncoder setFrontFacingWinding:MTLWindingCounterClockwise];
+        [commandEncoder setCullMode:MTLCullModeBack];
 
         for (NSUInteger i = 0; i < vertexBuffers.count; i++) {
             [commandEncoder setVertexBuffer:vertexBuffers[i] offset:0 atIndex:0];
@@ -75,6 +78,7 @@ matrix_float4x4 createOrthographicMatrix(float left, float right, float top, flo
                                                    indexBuffer: indexBuffer
                                                    indexBufferOffset: 0];
         }
+
         [commandEncoder endEncoding];
         [commandBuffer presentDrawable:drawable];
         [commandBuffer commit];
@@ -100,9 +104,9 @@ void buildUIBuffers(AppDelegate *appDelegate, UIElement *headElement) {
         if (node->type == EDITOR) { 
             VertexIn vertexData[] = {
                 { {node->xPos, node->yPos},                              { node->color[0], node->color[1], node->color[2], 1.0} },
-                { {node->xPos + node->width, node->yPos},                { node->color[0], node->color[1], node->color[2], 1.0} },
-                { {node->xPos + node->width, node->yPos + node->height}, { node->color[0], node->color[1], node->color[2], 1.0} },
                 { { node->xPos, node->yPos + node->height},              { node->color[0], node->color[1], node->color[2], 1.0} },
+                { {node->xPos + node->width, node->yPos + node->height}, { node->color[0], node->color[1], node->color[2], 1.0} },
+                { {node->xPos + node->width, node->yPos},                { node->color[0], node->color[1], node->color[2], 1.0} },
             };
 
             id<MTLBuffer> vertexBuffer = [appDelegate->mtlDevice newBufferWithBytes:vertexData
@@ -198,4 +202,22 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement) {
     [NSApp run];
     [pool release];
     return EXIT_SUCCESS;
+}
+
+char *platformReadFile(char *path) {
+    FILE *file = fopen(path, "r");
+    if (file == NULL) {
+        printf("%s%s\n", "Error reading file: ", path);
+        exit(EXIT_FAILURE);
+    }
+
+    fseek(file, 0L, SEEK_END);
+    int size = ftell(file);
+    fseek(file, 0L, SEEK_SET);
+
+    char *result = (char *)malloc(sizeof(char) * size);
+    int bytesRead = fread(result, sizeof(char), size, file);
+    result[bytesRead] = '\0';
+
+    return result;
 }
