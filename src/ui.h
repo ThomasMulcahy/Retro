@@ -11,6 +11,8 @@
  ********************************************************************/
 
 #define TO_PERCENTAGE(n) ((n < 0.0f) ? 0.0f : (n > 100.0f) ? 100.0f : (n / 100.0f))
+#define COL_TO_FLOAT(n) ((float)n / 255.0f)
+
  /*
   * ElementType determines how the UIElement should be handled. There
   * will be corresponding functions for each type of element, these
@@ -44,13 +46,5 @@ typedef struct _UIElement {
     struct _UIElement *child;
 } UIElement;
 
-/********************************************************************
- * The following functions are to be implemented by the platforms 
- * rendering system and SHOULD NOT be called from anywhere inside an
- * application. 
- * 
- * The UI tree structure is used to define the UI, such 
- * as style and shape of the elements.
- ********************************************************************/
 
 #endif

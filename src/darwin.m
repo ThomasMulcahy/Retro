@@ -52,9 +52,6 @@ matrix_float4x4 createOrthographicMatrix(float left, float right, float top, flo
 
     - (void)drawInMTKView:(MTKView*)view {
 
-        printf("%s %f\n", "Width:", frameWidth);
-        printf("%s %f\n", "Height:", frameHeight);
-
         void* uniformSrc = &(UniformsIn) {
             .orthoMatrix = createOrthographicMatrix(0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f)
         };
@@ -99,8 +96,6 @@ void buildUIBuffers(AppDelegate *appDelegate, UIElement *headElement) {
 
     UIElement *node = headElement;
     while (node != NULL) {
-
-        printf("%s %f\n", "Width:", node->width);
 
         if (node->type == EDITOR) { 
             VertexIn vertexData[] = {

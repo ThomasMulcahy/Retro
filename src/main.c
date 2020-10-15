@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
             .yPos = 0,
             .width = TO_PERCENTAGE(100),
             .height = TO_PERCENTAGE(100),
-            .color = {45.0f / 255.0f, 48.0f / 255.0f, 58.0f / 255.0f}
+            .color = {COL_TO_FLOAT(45), COL_TO_FLOAT(48), COL_TO_FLOAT(58)}
         }
     };
 
