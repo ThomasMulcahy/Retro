@@ -138,16 +138,18 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement) {
     // Setup window
     // Note: We can pass 0, 0 for the location as we set the window to center furhter down.
     NSRect frame = NSMakeRect(0, 0, winOptions->width, winOptions->height); 
-    NSWindow *window = [[NSWindow alloc]
-           initWithContentRect: frame
-                     styleMask: NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable
-                       backing: NSBackingStoreBuffered
-                         defer: NO];
+    NSWindow *window = [[NSWindow alloc] initWithContentRect: frame
+                                         styleMask: NSWindowStyleMaskTitled | 
+                                                    NSWindowStyleMaskClosable | 
+                                                    NSWindowStyleMaskMiniaturizable | 
+                                                    NSWindowStyleMaskResizable
+                                         backing: NSBackingStoreBuffered
+                                         defer: NO];
 
     //Setup Metal view and device
     appDelegate->mtlDevice = MTLCreateSystemDefaultDevice();
     MTKView* mtlView = [[MTKView alloc] initWithFrame:frame 
-                                     device:appDelegate->mtlDevice];
+                                        device:appDelegate->mtlDevice];
     [mtlView setDelegate: appDelegate];
 
     [window setTitle:@(winOptions->title)];
