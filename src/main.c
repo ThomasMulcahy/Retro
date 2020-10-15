@@ -1,13 +1,15 @@
 #include "platform.h"
 #include "ui.h"
 
+#include <stdio.h>
+
 int main(int argc, char *argv[]) {
 
     //Window settings
     WindowOpt options = {
         .title = "Retro",
-        .width = 450,
-        .height = 360
+        .width = 640,
+        .height = 400
     };
 
     //UI layout

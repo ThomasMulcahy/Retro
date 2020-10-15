@@ -1,3 +1,4 @@
+#include "ui.h"
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
 #import <Metal/Metal.h>
@@ -38,6 +39,12 @@ static matrix_float4x4 rotationMatrix2D(float radians)
 
 
 @interface AppDelegate : NSObject<NSApplicationDelegate, MTKViewDelegate> {
+@private
+    int frameWidth;
+    int frameHeight;
+
+    UIElement rootElement;
+
 @public
     NSWindow* _window;
     id<MTLDevice> mtlDevice;
@@ -55,8 +62,8 @@ static matrix_float4x4 rotationMatrix2D(float radians)
     }   
 
     - (void)mtkView:(MTKView*)view drawableSizeWillChange:(CGSize)size {
-        (void)view;
-        (void)size;
+        frameWidth = size.width;
+        frameHeight = size.height;
     }
 
     - (void)drawInMTKView:(MTKView*)view {
@@ -110,6 +117,9 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement, int argc, char *a
 
     [window setTitle:@(winOptions->title)];
     [window setContentView: mtlView];
+
+    NSAppearance *appearance = [NSAppearance appearanceNamed: NSAppearanceNameDarkAqua];
+    [window setAppearance: appearance];
     [window center];
 
     if (![window isMiniaturized]) {

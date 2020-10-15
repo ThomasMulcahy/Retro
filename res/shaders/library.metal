@@ -20,8 +20,8 @@ struct VertexOut
 };
 
 vertex VertexOut vertexFunction(device VertexIn *vertices [[buffer(0)]],
-        constant Uniforms &uniforms [[buffer(1)]],
-        uint vid [[vertex_id]])
+                                constant Uniforms &uniforms [[buffer(1)]],
+                                uint vid [[vertex_id]])
 {
     VertexOut out;
     out.position = uniforms.rotationMatrix * vertices[vid].position;
