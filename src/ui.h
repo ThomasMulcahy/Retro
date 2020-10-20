@@ -1,6 +1,8 @@
 #ifndef UI_H
 #define UI_H
 
+#include "editor.h"
+
 /********************************************************************
  * UI rendering is handled by the platforms target rendering system.
  * 

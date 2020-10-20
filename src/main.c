@@ -1,5 +1,6 @@
 #include "platform.h"
 #include "ui.h"
+#include "font.h"
 
 #include <stdio.h>
 

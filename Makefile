@@ -16,12 +16,12 @@ OBJECTS=$(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
 all: $(TARGET) clean
 
 $(TARGET): $(OBJECTS)
-	@echo "Compiling executable for release..."
+	@echo "Compiling executable for release mode..."
 	$(CC) $(CFLAGS) $(OBJC_FLAGS) -O2 $(OBJECTS) $(OBJC_SOURCES) -o $(BUILD_DIR)/release/$@
 	@echo "Compilation complete."
 
 debug: $(OBJECTS)
-	@echo "Compiling executable in debug..."
+	@echo "Compiling executable in debug mode..."
 	$(CC) $(CFLAGS) $(DEBUG_FLAGS) $(OBJC_FLAGS) -O0 $(OBJECTS) $(OBJC_SOURCES) -o $(BUILD_DIR)/$(TARGET)
 	@echo "Compilation complete."
 

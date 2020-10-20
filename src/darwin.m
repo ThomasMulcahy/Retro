@@ -51,6 +51,10 @@ matrix_float4x4 createOrthographicMatrix(float left, float right, float top, flo
         frameHeight = size.height;
     }
 
+    - (void)applicationDidFinishLaunching:(NSNotification *)notification {
+
+    }
+
     - (void)drawInMTKView:(MTKView*)view {
 
         void* uniformSrc = &(UniformsIn) {
@@ -89,44 +93,48 @@ matrix_float4x4 createOrthographicMatrix(float left, float right, float top, flo
  * This function is ran once when building the necessary data for the UI
  * to be rendered correctly by Metal.
  */
-void buildUIBuffers(AppDelegate *appDelegate, UIElement *headElement) {
+void buildUI(AppDelegate *appDelegate, UIElement *headElement) {
 
-    // Setup uniform buffer
-    appDelegate->uniformBuffer = [appDelegate->mtlDevice newBufferWithLength:sizeof(UniformsIn)
-                                                         options:MTLResourceCPUCacheModeWriteCombined];
+  // Setup uniform buffer
+  appDelegate->uniformBuffer = [appDelegate->mtlDevice
+      newBufferWithLength:sizeof(UniformsIn)
+                  options:MTLResourceCPUCacheModeWriteCombined];
 
-    // Build UI
-    appDelegate->vertexBuffers = [[NSMutableArray alloc] init];
+  // Build UI
+  appDelegate->vertexBuffers = [[NSMutableArray alloc] init];
 
-    UIElement *node = headElement;
-    while (node != NULL) {
+  UIElement *node = headElement;
+  while (node != NULL) {
 
-        if (node->type == EDITOR) { 
-            VertexIn vertexData[] = {
-                { {node->xPos, node->yPos},                              { node->color[0], node->color[1], node->color[2], 1.0} },
-                { { node->xPos, node->yPos + node->height},              { node->color[0], node->color[1], node->color[2], 1.0} },
-                { {node->xPos + node->width, node->yPos + node->height}, { node->color[0], node->color[1], node->color[2], 1.0} },
-                { {node->xPos + node->width, node->yPos},                { node->color[0], node->color[1], node->color[2], 1.0} },
-            };
+    if (node->type == EDITOR) {
+      VertexIn vertexData[] = {
+          {{node->xPos, node->yPos},
+           {node->color[0], node->color[1], node->color[2], 1.0}},
+          {{node->xPos, node->yPos + node->height},
+           {node->color[0], node->color[1], node->color[2], 1.0}},
+          {{node->xPos + node->width, node->yPos + node->height},
+           {node->color[0], node->color[1], node->color[2], 1.0}},
+          {{node->xPos + node->width, node->yPos},
+           {node->color[0], node->color[1], node->color[2], 1.0}},
+      };
 
-            id<MTLBuffer> vertexBuffer = [appDelegate->mtlDevice newBufferWithBytes:vertexData
-                                                                length:sizeof(vertexData)
-                                                                options:MTLResourceOptionCPUCacheModeDefault];
-            [appDelegate->vertexBuffers addObject: vertexBuffer];
+      id<MTLBuffer> vertexBuffer = [appDelegate->mtlDevice
+          newBufferWithBytes:vertexData
+                      length:sizeof(vertexData)
+                     options:MTLResourceOptionCPUCacheModeDefault];
+      [appDelegate->vertexBuffers addObject:vertexBuffer];
 
+      // TODO: Currently index data is always the same - Maybe move out of here?
+      int indexData[] = {0, 1, 2, 3, 0, 2};
 
-            // TODO: Currently index data is always the same - Maybe move out of here? 
-            int indexData[] = {
-                0, 1, 2, 3, 0 ,2
-            };
-
-            id<MTLBuffer> indexBuffer = [appDelegate->mtlDevice newBufferWithBytes:indexData
-                                                                length:sizeof(indexData)
-                                                                options:MTLResourceOptionCPUCacheModeDefault];
-            appDelegate->indexBuffer = indexBuffer;
-        }
-        node = node->child;
+      id<MTLBuffer> indexBuffer = [appDelegate->mtlDevice
+          newBufferWithBytes:indexData
+                      length:sizeof(indexData)
+                     options:MTLResourceOptionCPUCacheModeDefault];
+      appDelegate->indexBuffer = indexBuffer;
     }
+    node = node->child;
+  }
 }
 
 int platformRun(WindowOpt *winOptions, UIElement *headElement) {
@@ -167,9 +175,7 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement) {
         [window makeKeyAndOrderFront:NSApp];
     }
 
-    /*
-     * Metal setup: Library
-     */
+    // Setup metal shaders
     NSString* librarySrc = [NSString stringWithContentsOfFile:@"res/shaders/library.metal" encoding:NSUTF8StringEncoding error:&error];
     if(!librarySrc) {
         [NSException raise:@"Failed to read shaders" format:@"%@", [error localizedDescription]];
@@ -192,7 +198,13 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement) {
       [NSException raise:@"Failed to create pipeline state" format:@"%@", [error localizedDescription]];
     }
 
-    buildUIBuffers(appDelegate, headElement);
+    //Setup font
+    FontOptions fontOpts = {
+        .fontBinary = platformReadFileToBufferBinary("res/fonts/JetBrainsMono/JetBrainsMono-Regular.ttf")
+    };
+    Font *font = fontParse(&fontOpts);
+
+    buildUI(appDelegate, headElement);
 
     appDelegate->mtlCommandQueue = [appDelegate->mtlDevice newCommandQueue];
     appDelegate->frameWidth = mtlView.drawableSize.width;
@@ -201,11 +213,32 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement) {
     [NSApp setDelegate:[[AppDelegate alloc] init]];
     [NSApp run];
     [pool release];
+
+    fontDestroy(font);
     return EXIT_SUCCESS;
 }
 
-char *platformReadFile(char *path) {
+char *platformReadFileToBuffer(char *path) {
     FILE *file = fopen(path, "r");
+    if (file == NULL) {
+        printf("%s%s\n", "Error reading file: ", path);
+        exit(EXIT_FAILURE);
+    }
+
+    fseek(file, 0L, SEEK_END);
+    int size = ftell(file);
+    fseek(file, 0L, SEEK_SET);
+
+    char *result = (char *)malloc(sizeof(char) * size);
+    int bytesRead = fread(result, sizeof(char), size, file);
+    result[bytesRead] = '\0';
+
+    return result;
+}
+
+
+char *platformReadFileToBufferBinary(char *path) {
+    FILE *file = fopen(path, "rb");
     if (file == NULL) {
         printf("%s%s\n", "Error reading file: ", path);
         exit(EXIT_FAILURE);

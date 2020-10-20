@@ -2,6 +2,7 @@
 #define PLATFORM_H
 
 #include "ui.h"
+#include "font.h"
 
 typedef struct _WindowOpt {
     char *title;
@@ -11,6 +12,8 @@ typedef struct _WindowOpt {
 
 int platformRun(WindowOpt *winOptions, UIElement *headElement);
 
-char *platformReadFile(char *path);
+char *platformReadFileToBuffer(char *path);
+
+char *platformReadFileToBufferBinary(char *path);
 
 #endif
