@@ -20,7 +20,7 @@
 
 #define READ_UINT16(buffer) ((uint16) (READ_UINT8(buffer) << 8) | \
                                       (READ_UINT8(buffer) << 0))
-#define READ_IINT16(buffer) ((int16) (READ_INT8(buffer) << 8) | \
+#define READ_INT16(buffer) ((int16) (READ_INT8(buffer) << 8) | \
                                      (READ_INT8(buffer) << 0))
 
 #define READ_UINT32(buffer) ((uint32) (READ_UINT8(buffer) << 24 | \
@@ -40,6 +40,8 @@
                                      READ_INT8(buffer) << 16 | \
                                      READ_INT8(buffer) << 8  | \
                                      READ_INT8(buffer) << 0))
+
+#define TAG_TO_UINT32(tag) ((uint32) ((tag[0] << 24) | (tag[1] << 16) | (tag[2] << 8) | (tag[3] << 0)))
 
 typedef struct _EncodingRecord {
     uint16 platformID;

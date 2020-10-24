@@ -53,6 +53,7 @@ post *parsePOST(Font *font);
 
 Font *fontParse(char *fontPath);
 void fontDestroy(Font *font);
+TableDirectory *getTableDirFromTag(Font *font, char *tag);
 
 /* 
  * TODO: This really needs to be in the platform layer as we interact with the

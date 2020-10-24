@@ -24,6 +24,7 @@ static FontOffsetTable *parseOffsetTable(Font* font) {
 
 static void printTableDirs(Font *font) {
 	for (int i = 0; i < font->offsetTable->numTables; i++) {
+		//The tag prints backwards but it seems to be working fine?
 		printf("%s%.4s\n", "Tag: ", (char *) &font->tableDirs[i].tag);
 		printf("%s%d\n", "Checksum: ", font->tableDirs[i].checksum);
 		printf("%s%d\n", "Offset: ", font->tableDirs[i].offset);
@@ -46,6 +47,28 @@ static TableDirectory *parseTableDirs(Font *font) {
 	return tableDirs;
 }
 
+static void printHEAD(Font *font) {
+    printf("%s\n", "HEAD Table");
+    printf("%s%d\n", "Major Ver: ", font->head->majorVersion);
+    printf("%s%d\n", "Minor Ver: ", font->head->minorVersion);
+    printf("%s%d\n", "Font Rev: ", font->head->fontRevision);
+    printf("%s%d\n", "Check Sum Adj: ", font->head->checkSumAdjustment);
+    printf("%s%d\n", "Magic Number: ", font->head->magicNumber);
+    printf("%s%d\n", "Flags: ", font->head->flags);
+    printf("%s%d\n", "Units per Em: ", font->head->unitsPerEm);
+    printf("%s%lld\n", "Created: ", font->head->created);
+    printf("%s%lld\n", "Modified: ", font->head->modified);
+    printf("%s%d\n", "xMin: ", font->head->xMin);
+    printf("%s%d\n", "yMin: ", font->head->yMin);
+    printf("%s%d\n", "xMax: ", font->head->xMax);
+    printf("%s%d\n", "yMax: ", font->head->yMax);
+    printf("%s%d\n", "Mac Style: ", font->head->macStyle);
+    printf("%s%d\n", "Lowest Rec PPEM: ", font->head->lowestRecPPEM);
+    printf("%s%d\n", "Font Dir Hint: ", font->head->fontDirectionHint);
+    printf("%s%d\n", "Index to Loc Format: ", font->head->indexToLocFormat);
+    printf("%s%d\n", "Glyph Format Data: ", font->head->glpyhDataFormat);
+}
+
 Font *fontParse(char *fontPath) {
 
 	Font *font = (Font *) malloc(sizeof(Font));
@@ -53,14 +76,28 @@ Font *fontParse(char *fontPath) {
 	font->offsetTable = parseOffsetTable(font);
 	font->tableDirs = parseTableDirs(font);
 
+	font->head = parseHEAD(font);
+
 	printOffsetTable(font);
 	printTableDirs(font);
+	printHEAD(font);
 
 	return font;
 }
 
 void fontDestroy(Font *font) {
 
+}
+
+TableDirectory *getTableDirFromTag(Font *font, char *tag) {
+	int numTables = font->offsetTable->numTables;
+	for (int i = 0; i < numTables; i++) {
+		if (font->tableDirs[i].tag == TAG_TO_UINT32(tag)) {
+			return &font->tableDirs[i];
+		}
+	}
+
+	return NULL;
 }
 
 char *readFontFile(char *path) {
