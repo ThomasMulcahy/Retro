@@ -92,7 +92,7 @@ matrix_float4x4 createOrthographicMatrix(float left, float right, float top, flo
  * This function is ran once when building the necessary data for the UI
  * to be rendered correctly by Metal.
  */
-void buildUI(AppDelegate *appDelegate, UIElement *headElement) {
+static void buildUI(AppDelegate *appDelegate, UIElement *headElement) {
 
   // Setup uniform buffer
   appDelegate->uniformBuffer = [appDelegate->mtlDevice
@@ -198,11 +198,9 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement) {
     }
 
     //Setup font
-    FontOptions fontOpts = {
-        .fontBinary = platformReadFileToBufferBinary("res/fonts/JetBrainsMono/JetBrainsMono-Regular.ttf")
-    };
-    Font *font = fontParse(&fontOpts);
+    Font *font = fontParse("res/fonts/JetBrainsMono/JetBrainsMono-Regular.ttf");
 
+    //Setup UI
     buildUI(appDelegate, headElement);
 
     appDelegate->mtlCommandQueue = [appDelegate->mtlDevice newCommandQueue];
@@ -219,25 +217,6 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement) {
 
 char *platformReadFileToBuffer(char *path) {
     FILE *file = fopen(path, "r");
-    if (file == NULL) {
-        printf("%s%s\n", "Error reading file: ", path);
-        exit(EXIT_FAILURE);
-    }
-
-    fseek(file, 0L, SEEK_END);
-    int size = ftell(file);
-    fseek(file, 0L, SEEK_SET);
-
-    char *result = (char *)malloc(sizeof(char) * size);
-    int bytesRead = fread(result, sizeof(char), size, file);
-    result[bytesRead] = '\0';
-
-    return result;
-}
-
-
-char *platformReadFileToBufferBinary(char *path) {
-    FILE *file = fopen(path, "rb");
     if (file == NULL) {
         printf("%s%s\n", "Error reading file: ", path);
         exit(EXIT_FAILURE);
