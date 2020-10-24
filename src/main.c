@@ -1,20 +1,15 @@
-#include "platform.h"
+#include "platform/platform.h"
 #include "ui.h"
-#include "font.h"
 
-#include <stdio.h>
+int main() {
 
-int main(int argc, char *argv[]) {
-
-    //Window settings
     WindowOpt options = {
         .title = "Retro",
         .width = 640,
         .height = 400
     };
 
-    //UI layout
-    UIElement layout = {
+    UIElement root = {
         .type = CONTAINER,
 
         .xPos = 0,
@@ -33,5 +28,5 @@ int main(int argc, char *argv[]) {
         }
     };
 
-    return platformRun(&options, &layout);
+    return platformRun(&options, &root);
 }
