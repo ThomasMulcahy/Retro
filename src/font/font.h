@@ -55,7 +55,7 @@ cmap *parseCMAP(Font *font, int *index);
 glyf *parseGLYF(Font *font, int *index);
 head *parseHEAD(Font *font, int *index);
 hhea *parseHHEA(Font *font, int *index);
-hmtx *parseHMTX(Font *font, int *index);
+hmtx *parseHMTX(Font *font, int *index, uint16 numberOfHMetrics, uint16 numGlyphs);
 loca *parseLOCA(Font *font, int *index);
 maxp *parseMAXP(Font *font, int *index);
 name *parseNAME(Font *font, int *index);

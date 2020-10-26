@@ -193,10 +193,14 @@ Font *fontParse(char *fontPath) {
 	font->head = parseHEAD(font, &index);
 	font->maxp = parseMAXP(font, &index);
 	font->hhea = parseHHEA(font, &index);
+	font->hmtx = parseHMTX(font, &index, font->hhea->numberOfHMetrics, 
+										 font->maxp->numGlyphs);
 
+#if 1
 	printHEAD(font);
 	printMAXP(font);
 	printHHEA(font);
+#endif
 
 	return font;
 }
