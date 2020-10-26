@@ -138,6 +138,25 @@ static void printHEAD(Font *font) {
     printf("%s%d\n", "Glyph Format Data: ", font->head->glpyhDataFormat);
 }
 
+static void printMAXP(Font *font) {
+	printf("%s\n", "MAXP");
+	printf("%s%d\n", "Ver: ", font->maxp->version);
+	printf("%s%d\n", "Num Glyphs: ", font->maxp->numGlyphs);
+	printf("%s%d\n", "Max Points: ", font->maxp->maxPoints);
+	printf("%s%d\n", "Max Contours: ", font->maxp->maxContours);
+	printf("%s%d\n", "Max Composite Points: ", font->maxp->maxCompositePoints);
+	printf("%s%d\n", "Max Composite Contours: ", font->maxp->maxCompositeContours);
+	printf("%s%d\n", "Max Zones: ", font->maxp->maxZones);
+	printf("%s%d\n", "Max Twilight Zones: ", font->maxp->maxTwilightPoints);
+	printf("%s%d\n", "Max Storage: ", font->maxp->maxStorage);
+	printf("%s%d\n", "Max Function Defs: ", font->maxp->maxFunctionDefs);
+	printf("%s%d\n", "Max Instruction Defs: ", font->maxp->maxInstructionDefs);
+	printf("%s%d\n", "Max Stack Elements: ", font->maxp->maxStackElements);
+	printf("%s%d\n", "Max Size Of Instructions: ", font->maxp->maxSizeOfInstructions);
+	printf("%s%d\n", "Max Component Elements: ", font->maxp->maxComponentElements);
+	printf("%s%d\n", "Max Component Depth: ", font->maxp->maxComponentDepth);
+}
+
 Font *fontParse(char *fontPath) {
 
 	Font *font = (Font *) malloc(sizeof(Font));
@@ -150,13 +169,19 @@ Font *fontParse(char *fontPath) {
 	printTableDirs(font);
 
 	font->head = parseHEAD(font, &index);
+	font->maxp = parseMAXP(font, &index);
+
 	printHEAD(font);
+	printMAXP(font);
 
 	return font;
 }
 
 void fontDestroy(Font *font) {
-
+	/*
+	 * TODO: Assess what is needed for rendering, everything else can be 
+	 * released back to the system.
+	 */
 }
 
 TableDirectory *getTableDirFromTag(Font *font, char *tag) {
