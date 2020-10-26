@@ -1,8 +1,7 @@
 #include "font.h"
 #include "types.h"
-#include <stdlib.h>
 
-head *parseHEAD(Font *font) {
+head *parseHEAD(Font *font, int *index) {
     TableDirectory *dir = getTableDirFromTag(font, "head");
 
     if (dir == NULL) {
@@ -11,25 +10,25 @@ head *parseHEAD(Font *font) {
     }
 
     head *head = malloc(sizeof(head));
-    SEEK(font->fontBuffer, dir->offset);
-    head->majorVersion = READ_UINT16(font->fontBuffer);
-    head->minorVersion = READ_UINT16(font->fontBuffer);
-    head->fontRevision = READ_UINT32(font->fontBuffer);
-    head->checkSumAdjustment = READ_UINT32(font->fontBuffer);
-    head->magicNumber = READ_UINT32(font->fontBuffer);
-    head->flags = READ_UINT16(font->fontBuffer);
-    head->unitsPerEm = READ_UINT16(font->fontBuffer);
-    head->created = READ_INT64(font->fontBuffer);
-    head->modified = READ_INT64(font->fontBuffer);
-    head->xMin = READ_UINT16(font->fontBuffer);
-    head->yMin = READ_UINT16(font->fontBuffer);
-    head->xMax = READ_UINT16(font->fontBuffer);
-    head->yMax = READ_UINT16(font->fontBuffer);
-    head->macStyle = READ_UINT16(font->fontBuffer);
-    head->lowestRecPPEM = READ_UINT16(font->fontBuffer);
-    head->fontDirectionHint = READ_INT16(font->fontBuffer);
-    head->indexToLocFormat = READ_INT16(font->fontBuffer);
-    head->glpyhDataFormat = READ_INT16(font->fontBuffer);
+    seek(index, dir->offset);
+    head->majorVersion = getUInt16(font->fontBuffer, index);
+    head->minorVersion = getUInt16(font->fontBuffer, index);
+    head->fontRevision = getUInt32(font->fontBuffer, index);
+    head->checkSumAdjustment = getUInt32(font->fontBuffer, index);
+    head->magicNumber = getUInt32(font->fontBuffer, index);
+    head->flags = getUInt16(font->fontBuffer, index);
+    head->unitsPerEm = getUInt16(font->fontBuffer, index);
+    head->created = getInt64(font->fontBuffer, index);
+    head->modified = getInt64(font->fontBuffer, index);
+    head->xMin = getUInt16(font->fontBuffer, index);
+    head->yMin = getUInt16(font->fontBuffer, index);
+    head->xMax = getUInt16(font->fontBuffer, index);
+    head->yMax = getUInt16(font->fontBuffer, index);
+    head->macStyle = getUInt16(font->fontBuffer, index);
+    head->lowestRecPPEM = getUInt16(font->fontBuffer, index);
+    head->fontDirectionHint = getInt16(font->fontBuffer, index);
+    head->indexToLocFormat = getInt16(font->fontBuffer, index);
+    head->glpyhDataFormat = getInt16(font->fontBuffer, index);
 
     return head;
 }

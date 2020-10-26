@@ -41,15 +41,26 @@ typedef struct _Font {
     post *post;
 } Font;
 
-cmap *parseCMAP(Font *font);
-glyf *parseGLYF(Font *font);
-head *parseHEAD(Font *font);
-hhea *parseHHEA(Font *font);
-hmtx *parseHMTX(Font *font);
-loca *parseLOCA(Font *font);
-maxp *parseMAXP(Font *font);
-name *parseNAME(Font *font);
-post *parsePOST(Font *font);
+void seek(int *index, int n);
+void skip(int *index, int amt);
+uint8 getUInt8(char *buffer, int *index);
+int8 getInt8(char *buffer, int *index);
+uint16 getUInt16(char *buffer, int *index);
+int16 getInt16(char *buffer, int *index);
+uint32 getUInt32(char *buffer, int *index);
+int32 getInt32(char *buffer, int *index);
+int64 getInt64(char *buffer, int *index);
+uint32 tagToUInt32(char *tag);
+
+cmap *parseCMAP(Font *font, int *index);
+glyf *parseGLYF(Font *font, int *index);
+head *parseHEAD(Font *font, int *index);
+hhea *parseHHEA(Font *font, int *index);
+hmtx *parseHMTX(Font *font, int *index);
+loca *parseLOCA(Font *font, int *index);
+maxp *parseMAXP(Font *font, int *index);
+name *parseNAME(Font *font, int *index);
+post *parsePOST(Font *font, int *index);
 
 Font *fontParse(char *fontPath);
 void fontDestroy(Font *font);

@@ -12,37 +12,6 @@
 #define uint32 uint32_t
 #define int64 long long
 
-#define SEEK(buffer, n) ((*buffer) = n)
-#define SKIP(buffer, amt) ((*buffer) += amt)
-
-#define READ_UINT8(buffer) ((uint8) *buffer++)
-#define READ_INT8(buffer) ((int8) *buffer++)
-
-#define READ_UINT16(buffer) ((uint16) (READ_UINT8(buffer) << 8) | \
-                                      (READ_UINT8(buffer) << 0))
-#define READ_INT16(buffer) ((int16) (READ_INT8(buffer) << 8) | \
-                                     (READ_INT8(buffer) << 0))
-
-#define READ_UINT32(buffer) ((uint32) (READ_UINT8(buffer) << 24 | \
-                                       READ_UINT8(buffer) << 16 | \
-                                       READ_UINT8(buffer) << 8  | \
-                                       READ_UINT8(buffer) << 0))
-#define READ_INT32(buffer) ((int32) (READ_INT8(buffer) << 24 | \
-                                     READ_INT8(buffer) << 16 | \
-                                     READ_INT8(buffer) << 8  | \
-                                     READ_INT8(buffer) << 0))
-
-#define READ_INT64(buffer) ((int64) (READ_INT8(buffer) << 56 | \
-                                     READ_INT8(buffer) << 48 | \
-                                     READ_INT8(buffer) << 40 | \
-                                     READ_INT8(buffer) << 32 | \
-                                     READ_INT8(buffer) << 24 | \
-                                     READ_INT8(buffer) << 16 | \
-                                     READ_INT8(buffer) << 8  | \
-                                     READ_INT8(buffer) << 0))
-
-#define TAG_TO_UINT32(tag) ((uint32) ((tag[0] << 24) | (tag[1] << 16) | (tag[2] << 8) | (tag[3] << 0)))
-
 typedef struct _EncodingRecord {
     uint16 platformID;
     uint16 encodingID;

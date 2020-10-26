@@ -1,6 +1,75 @@
 #include "font.h"
 #include "types.h"
 
+void seek(int *index, int n) {
+	 *index = n;
+}
+
+void skip(int *index, int amt) {
+	*index += amt;
+}
+
+uint8 getUInt8(char *buffer, int *index) {
+	uint8 result = buffer[*index];
+	++(*index);
+	return result;
+}
+
+int8 getInt8(char *buffer, int *index) {
+	int8 result = buffer[*index];
+	++(*index);
+	return result;
+}
+
+uint16 getUInt16(char *buffer, int *index) {
+	uint16 result = 0;
+	result |= getUInt8(buffer, index) << 8;
+	result |= getUInt8(buffer, index) << 0;
+	return result;
+}
+
+int16 getInt16(char *buffer, int *index) {
+	int16 result = 0;
+	result |= getInt8(buffer, index) << 8;
+	result |= getInt8(buffer, index) << 0;
+	return result;
+}
+
+uint32 getUInt32(char *buffer, int *index) {
+	uint32 result = 0;
+	result |= getUInt8(buffer, index) << 24;
+	result |= getUInt8(buffer, index) << 16;
+	result |= getUInt8(buffer, index) << 8;
+	result |= getUInt8(buffer, index) << 0;
+	return result;
+}
+
+int32 getInt32(char *buffer, int *index) {
+	int32 result = 0;
+	result |= getInt8(buffer, index) << 24;
+	result |= getInt8(buffer, index) << 16;
+	result |= getInt8(buffer, index) << 8;
+	result |= getInt8(buffer, index) << 0;
+	return result;
+}
+
+int64 getInt64(char *buffer, int *index) {
+	int64 result = 0;
+	result |= getInt8(buffer, index) << 56;
+	result |= getInt8(buffer, index) << 48;
+	result |= getInt8(buffer, index) << 40;
+	result |= getInt8(buffer, index) << 32;
+	result |= getInt8(buffer, index) << 24;
+	result |= getInt8(buffer, index) << 16;
+	result |= getInt8(buffer, index) << 8;
+	result |= getInt8(buffer, index) << 0;
+	return result;
+}
+
+uint32 tagToUInt32(char *tag) {
+	return (uint32) ((tag[0] << 24) | (tag[1] << 16) | (tag[2] << 8) | (tag[3] << 0));
+}
+
 static void printOffsetTable(Font *font) {
 	printf("%s\n", "Offset Table:");
 	printf("%s%d\n", "SFNT Version: ", font->offsetTable->sfntVersion);
@@ -10,14 +79,14 @@ static void printOffsetTable(Font *font) {
 	printf("%s%d\n", "Range Shift: ", font->offsetTable->rangeShift);
 }
 
-static FontOffsetTable *parseOffsetTable(Font* font) {
+static FontOffsetTable *parseOffsetTable(Font* font, int *index) {
 	FontOffsetTable *offsetTable = (FontOffsetTable *) malloc(sizeof(FontOffsetTable));
 
-	offsetTable->sfntVersion = READ_UINT32(font->fontBuffer);
-	offsetTable->numTables = READ_UINT16(font->fontBuffer);
-	offsetTable->searchRange = READ_UINT16(font->fontBuffer);
-	offsetTable->entrySelector = READ_UINT16(font->fontBuffer);
-	offsetTable->rangeShift = READ_UINT16(font->fontBuffer);
+	offsetTable->sfntVersion = getUInt32(font->fontBuffer, index);
+	offsetTable->numTables = getUInt16(font->fontBuffer, index);
+	offsetTable->searchRange = getUInt16(font->fontBuffer, index);
+	offsetTable->entrySelector = getUInt16(font->fontBuffer, index);
+	offsetTable->rangeShift = getUInt16(font->fontBuffer, index);
 
 	return offsetTable;
 }
@@ -32,16 +101,16 @@ static void printTableDirs(Font *font) {
 	}
 }
 
-static TableDirectory *parseTableDirs(Font *font) {
+static TableDirectory *parseTableDirs(Font *font, int *index) {
 	int numTables = font->offsetTable->numTables;
 	TableDirectory *tableDirs = (TableDirectory *) malloc(sizeof(TableDirectory) * numTables);
 
 	for (int i = 0; i < numTables; i++) {
 		TableDirectory *dir = &tableDirs[i];
-		dir->tag = READ_UINT32(font->fontBuffer);
-		dir->checksum = READ_UINT32(font->fontBuffer);
-		dir->offset = READ_UINT32(font->fontBuffer);
-		dir->length = READ_UINT32(font->fontBuffer);
+		dir->tag = getUInt32(font->fontBuffer, index);
+		dir->checksum = getUInt32(font->fontBuffer, index);
+		dir->offset = getUInt32(font->fontBuffer, index);
+		dir->length = getUInt32(font->fontBuffer, index);
 	}
 
 	return tableDirs;
@@ -72,14 +141,15 @@ static void printHEAD(Font *font) {
 Font *fontParse(char *fontPath) {
 
 	Font *font = (Font *) malloc(sizeof(Font));
+	int index = 0;
 	font->fontBuffer = readFontFile(fontPath);
-	font->offsetTable = parseOffsetTable(font);
-	font->tableDirs = parseTableDirs(font);
-
-	font->head = parseHEAD(font);
+	font->offsetTable = parseOffsetTable(font, &index);
+	font->tableDirs = parseTableDirs(font, &index);
 
 	printOffsetTable(font);
 	printTableDirs(font);
+
+	font->head = parseHEAD(font, &index);
 	printHEAD(font);
 
 	return font;
@@ -92,7 +162,7 @@ void fontDestroy(Font *font) {
 TableDirectory *getTableDirFromTag(Font *font, char *tag) {
 	int numTables = font->offsetTable->numTables;
 	for (int i = 0; i < numTables; i++) {
-		if (font->tableDirs[i].tag == TAG_TO_UINT32(tag)) {
+		if (font->tableDirs[i].tag == tagToUInt32(tag)) {
 			return &font->tableDirs[i];
 		}
 	}
