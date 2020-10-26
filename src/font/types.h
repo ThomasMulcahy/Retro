@@ -203,7 +203,7 @@ typedef struct _OS2 {
     int16 ySuperscriptXOffset;
     int16 ySuperscriptYOffset;
     int16 yStrikeoutSize;
-    int16 yStirkeoutPosition;
+    int16 yStrikeoutPosition;
     int16 sFamilyClass;
     uint8 panose[10];
     uint32 ulUnicodeRange1;

@@ -179,6 +179,78 @@ void printHHEA(Font *font) {
 	printf("%s%d\n", "Number of H Metrics: ", font->hhea->numberOfHMetrics);
 }
 
+void printOS2(Font *font) {
+	printf("%s\n", "OS/2");
+	printf("%s%d\n", "Version: ", font->OS2->version);
+	printf("%s%d\n", "xAvgCharWidth: ", font->OS2->xAvgCharWidth);
+	printf("%s%d\n", "usWeightClass: ", font->OS2->usWeightClass);
+	printf("%s%d\n", "usWidthClass: ", font->OS2->usWidthClass);
+	printf("%s%d\n", "fsType: ", font->OS2->fsType);
+	printf("%s%d\n", "ySubscriptXSize: ", font->OS2->ySubscriptXSize);
+	printf("%s%d\n", "ySubscriptYSize: ", font->OS2->ySubscriptYSize);
+	printf("%s%d\n", "ySubscriptXOffset: ", font->OS2->ySubscriptXOffset);
+	printf("%s%d\n", "ySubscriptYOffset: ", font->OS2->ySubscriptYOffset);
+	printf("%s%d\n", "ySuperscriptXSize: ", font->OS2->ySuperscriptXSize);
+	printf("%s%d\n", "ySuperscriptYSize: ", font->OS2->ySuperscriptYSize);
+	printf("%s%d\n", "ySuperscriptXOffset: ", font->OS2->ySuperscriptXOffset);
+	printf("%s%d\n", "ySuperscriptYOffset: ", font->OS2->ySuperscriptYOffset);
+	printf("%s%d\n", "yStrikeoutSize: ", font->OS2->yStrikeoutSize);
+	printf("%s%d\n", "yStrikeoutPos: ", font->OS2->yStrikeoutPosition);
+	printf("%s%d\n", "sFamilyClass: ", font->OS2->sFamilyClass);
+
+	printf("%s", "panose [ ");
+	for (int i = 0; i < 10; i++)
+		printf("%d ", font->OS2->panose[i]);
+	
+	printf("%s\n", "]");
+	
+	printf("%s%d\n", "ulUnicodeRange1: ", font->OS2->ulUnicodeRange1);
+	printf("%s%d\n", "ulUnicodeRange2: ", font->OS2->ulUnicodeRange2);
+	printf("%s%d\n", "ulUnicodeRange3: ", font->OS2->ulUnicodeRange3);
+	printf("%s%d\n", "ulUnicodeRange4: ", font->OS2->ulUnicodeRange4);
+	printf("%s%d\n", "achVendID: ", font->OS2->achVendID);
+	printf("%s%d\n", "fsSelection: ", font->OS2->fsSelection);
+	printf("%s%d\n", "usFirstCharIndex: ", font->OS2->usFirstCharIndex);
+	printf("%s%d\n", "usLastCharIndex: ", font->OS2->usLastCharIndex);
+	printf("%s%d\n", "sTypoAscender: ", font->OS2->sTypoAscender);
+	printf("%s%d\n", "sTypeDescender: ", font->OS2->sTypoDescender);
+	printf("%s%d\n", "sTypoLineGap: ", font->OS2->sTypoLineGap);
+	printf("%s%d\n", "usWinAscent: ", font->OS2->usWinAscent);
+	printf("%s%d\n", "usWinDescent: ", font->OS2->usWinDescent);
+
+	switch (font->OS2->version) {
+        case 0x0001:
+            printf("%s%d\n", "ulCodePageRange1: ", font->OS2->ulCodePageRange1);
+            printf("%s%d\n", "ulCodePageRange2: ", font->OS2->ulCodePageRange2);
+            break;
+        case 0x0002:
+        case 0x0003:
+        case 0x0004:
+            printf("%s%d\n", "ulCodePageRange1: ", font->OS2->ulCodePageRange1);
+            printf("%s%d\n", "ulCodePageRange2: ", font->OS2->ulCodePageRange2);
+
+            printf("%s%d\n", "sxHeight: ", font->OS2->sxHeight);
+            printf("%s%d\n", "sCapHeight: ", font->OS2->sCapHeight);
+            printf("%s%d\n", "usDefaultChar: ", font->OS2->usDefaultChar);
+            printf("%s%d\n", "usBreakChar: ", font->OS2->usBreakChar);
+            printf("%s%d\n", "usMaxContext: ", font->OS2->usMaxContext);
+            break;
+        case 0x0005:
+           	printf("%s%d\n", "ulCodePageRange1: ", font->OS2->ulCodePageRange1);
+            printf("%s%d\n", "ulCodePageRange2: ", font->OS2->ulCodePageRange2);
+
+            printf("%s%d\n", "sxHeight: ", font->OS2->sxHeight);
+            printf("%s%d\n", "sCapHeight: ", font->OS2->sCapHeight);
+            printf("%s%d\n", "usDefaultChar: ", font->OS2->usDefaultChar);
+            printf("%s%d\n", "usBreakChar: ", font->OS2->usBreakChar);
+            printf("%s%d\n", "usMaxContext: ", font->OS2->usMaxContext);
+
+			printf("%s%d\n", "usLowerOpticalPointSize: ", font->OS2->usLowerOpticalPointSize);
+            printf("%s%d\n", "usUpperOpticalPointSize: ", font->OS2->usUpperOpticalPointSize);
+            break;
+    }
+}
+
 Font *fontParse(char *fontPath) {
 
 	Font *font = (Font *) malloc(sizeof(Font));
@@ -196,11 +268,13 @@ Font *fontParse(char *fontPath) {
 	font->hmtx = parseHMTX(font, &index, font->hhea->numberOfHMetrics, 
 										 font->maxp->numGlyphs);
 	font->loca = parseLOCA(font, &index, font->head->indexToLocFormat, font->maxp->numGlyphs);
+	font->OS2 = parseOS2(font, &index);
 
 #if 1
 	printHEAD(font);
 	printMAXP(font);
 	printHHEA(font);
+	printOS2(font);
 #endif
 
 	return font;
