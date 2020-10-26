@@ -10,7 +10,32 @@
 #define uint16 uint16_t
 #define int32 int32_t
 #define uint32 uint32_t
-#define int64 long long
+#define int64 int64_t
+
+//Simple glyph
+#define ON_CURVE_POINT 0x01
+#define X_SHORT_VECTOR 0x02
+#define Y_SHORT_VECTOR 0x04
+#define REPEAT_FLAG 0x08
+#define X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR 0x10
+#define Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR 0x20
+#define OVERLAP_SIMPLE 0x40
+#define RESERVED_SIMPLE 0x80
+
+//Comp glyph
+#define ARG_1_AND_2_ARE_WORDS 0x0001
+#define ARGS_ARE_XY_VALUES 0x0002
+#define ROUND_XY_TO_GRID 0x0004
+#define WE_HAVE_SCALE 0x0008
+#define MORE_COMPONENTS 0x0020
+#define WE_HAVE_AN_X_AND_Y_SCALE 0x0040
+#define WE_HAVE_A_TWO_BY_TWO 0x0080
+#define WE_HAVE_INSTRUCTIONS 0x0100
+#define USE_MY_METRICS 0x0200
+#define OVERLAP_COMPOUND 0x0400
+#define SCALED_COMPONENT_OFFSET 0x0800
+#define UNSCALED_COMPONENT_OFFSET 0x1000
+#define RESERVED_COMP 0xE010
 
 typedef struct _EncodingRecord {
     uint16 platformID;
@@ -63,7 +88,27 @@ typedef struct _cmap {
 } cmap;
 
 typedef struct _glyf {
+    int16 numberOfContours;
+    int16 xMin;
+    int16 yMin;
+    int16 xMax;
+    int16 yMax;
 
+    struct {
+        uint16 *endPtsOfContours; //Size: numberOfContours
+        uint16 instructionLength;
+        uint8 *instructions; //Size: instructionLength
+        uint8 *flags; //Size: numPoints + 1
+        int16 *xCoordinates; //Size: numPoints + 1
+        int16 *yCoordinates; //Size; numPoints + 1
+    } simpleGlyphTable;
+
+    struct {
+        uint16 flags;
+        uint16 glyphIndex;
+        int16 arg1;
+        int16 arg2;
+    } compGlyph;
 } glyf;
 
 typedef struct _head {
@@ -117,7 +162,11 @@ typedef struct _hmtx {
 } hmtx;
 
 typedef struct _loca {
+    //Version = 0
+    int16 *offsets16; //Size: numGlyphs + 1
 
+    //Version = 1
+    int32 *offsets32; //Size: numGlyphs + 1
 } loca;
 
 typedef struct _maxp {
@@ -139,11 +188,104 @@ typedef struct _maxp {
 } maxp;
 
 typedef struct _name {
+    uint16 format;
 
+    union {
+        uint16 count;
+        int16 offset;
+        struct {
+            uint16 platformID;
+            uint16 encodingID;
+            uint16 languageID;
+            uint16 name;
+            uint16 length;
+            int16 offset;
+        } *nameRecords; //Size: count
+    } Format_0;
+
+    union {
+        uint16 count;
+        int16 offset;
+        struct {
+            uint16 platformID;
+            uint16 encodingID;
+            uint16 languageID;
+            uint16 name;
+            uint16 length;
+            int16 offset;
+        } *nameRecords; //Size: count
+        uint16 langTagCount;
+        struct {
+            uint16 length;
+            int16 offset;
+        } *langTagRecords; //Size: langTagCount
+    } Format_1;
 } name;
 
 typedef struct _post {
+    int32 version;
+    int32 italicAngle;
+    int16 underlinePosition;
+    int16 underlineThickness;
+    uint32 isFixedPitch;
+    uint32 minMemType42;
+    uint32 maxMemType42;
+    uint32 minMemType1;
+    uint32 maxMemType1;
 
+
+    //If version == 2.0 then these variables are assigned
+    uint16 numGlpyhs;
+    uint16 *glyphNameIndex; //Size: numGlyphs
+    int8 *names; //Size: numberNewGlyphs
 } post;
+
+typedef struct _OS2 {
+    uint16 version;
+    int16 xAvgCharWidth;
+    uint16 usWeightClass;
+    uint16 usWidthClass;
+    uint16 fsType;
+    int16 ySubscriptXSize;
+    int16 ySubscriptYSize;
+    int16 ySubscriptXOffset;
+    int16 ySubscriptYOffset;
+    int16 ySuperscriptXSize;
+    int16 ySuperscriptYSize;
+    int16 ySuperscriptXOffset;
+    int16 ySuperscriptYOffset;
+    int16 yStrikeoutSize;
+    int16 yStirkeoutPosition;
+    int16 sFamilyClass;
+    uint8 panose[10];
+    uint32 ulUnicodeRange1;
+    uint32 ulUnicodeRange2;
+    uint32 ulUnicodeRange3;
+    uint32 ulUnicodeRange4;
+    uint32 achVendID;
+    uint16 fsSelection;
+    uint16 usFirstCharIndex;
+    uint16 usLastCharIndex;
+    int16 sTypoAscender;
+    int16 sTypoDescender;
+    int16 sTypoLineGap;
+    uint16 usWinAscent;
+    uint16 usWinDescent;
+
+    //Version 1
+    uint32 ulCodePageRange1;
+    uint32 ulCodePageRange2;
+
+    //Version 2/3/4
+    int16 sxHeight;
+    int16 sCapHeight;
+    uint16 usDefaultChar;
+    uint16 usBreakChar;
+    uint16 usMaxContext;
+
+    //Version 5
+    uint16 usLowerOpticalPointSize;
+    uint16 usUpperOpticalPointSize;
+} OS2;
 
 #endif
