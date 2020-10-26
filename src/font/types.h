@@ -3,6 +3,7 @@
 
 #include <ctype.h>
 #include <stdint.h>
+#include <string.h>
 
 #define int8 int8_t
 #define uint8 uint8_t
@@ -222,23 +223,6 @@ typedef struct _name {
     } Format_1;
 } name;
 
-typedef struct _post {
-    int32 version;
-    int32 italicAngle;
-    int16 underlinePosition;
-    int16 underlineThickness;
-    uint32 isFixedPitch;
-    uint32 minMemType42;
-    uint32 maxMemType42;
-    uint32 minMemType1;
-    uint32 maxMemType1;
-
-
-    //If version == 2.0 then these variables are assigned
-    uint16 numGlpyhs;
-    uint16 *glyphNameIndex; //Size: numGlyphs
-    int8 *names; //Size: numberNewGlyphs
-} post;
 
 typedef struct _OS2 {
     uint16 version;

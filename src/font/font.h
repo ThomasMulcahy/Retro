@@ -38,7 +38,6 @@ typedef struct _Font {
     loca *loca;
     maxp *maxp;
     name *name;
-    post *post;
 } Font;
 
 void seek(int *index, int n);
@@ -60,7 +59,6 @@ hmtx *parseHMTX(Font *font, int *index);
 loca *parseLOCA(Font *font, int *index);
 maxp *parseMAXP(Font *font, int *index);
 name *parseNAME(Font *font, int *index);
-post *parsePOST(Font *font, int *index);
 
 Font *fontParse(char *fontPath);
 void fontDestroy(Font *font);
