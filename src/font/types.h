@@ -188,42 +188,6 @@ typedef struct _maxp {
     uint16	maxComponentDepth;
 } maxp;
 
-typedef struct _name {
-    uint16 format;
-
-    union {
-        uint16 count;
-        int16 offset;
-        struct {
-            uint16 platformID;
-            uint16 encodingID;
-            uint16 languageID;
-            uint16 name;
-            uint16 length;
-            int16 offset;
-        } *nameRecords; //Size: count
-    } Format_0;
-
-    union {
-        uint16 count;
-        int16 offset;
-        struct {
-            uint16 platformID;
-            uint16 encodingID;
-            uint16 languageID;
-            uint16 name;
-            uint16 length;
-            int16 offset;
-        } *nameRecords; //Size: count
-        uint16 langTagCount;
-        struct {
-            uint16 length;
-            int16 offset;
-        } *langTagRecords; //Size: langTagCount
-    } Format_1;
-} name;
-
-
 typedef struct _OS2 {
     uint16 version;
     int16 xAvgCharWidth;
