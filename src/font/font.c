@@ -157,6 +157,28 @@ static void printMAXP(Font *font) {
 	printf("%s%d\n", "Max Component Depth: ", font->maxp->maxComponentDepth);
 }
 
+void printHHEA(Font *font) {
+	printf("%s\n", "HHEA");
+	printf("%s%d\n", "Major Version: ", font->hhea->majorVersion);
+	printf("%s%d\n", "Minor Version: ", font->hhea->minorVersion);
+	printf("%s%d\n", "Ascender: ", font->hhea->ascender);
+	printf("%s%d\n", "Descender: ", font->hhea->descender);
+	printf("%s%d\n", "Line Gap: ", font->hhea->lineGap);
+	printf("%s%d\n", "Advanced Width Max: ", font->hhea->advanceWidthMax);
+	printf("%s%d\n", "Min Left Side Bearing: ", font->hhea->minLeftSideBearing);
+	printf("%s%d\n", "Min Right Side Bearing: ", font->hhea->minRightSideBearing);
+	printf("%s%d\n", "X Max Extent: ", font->hhea->xMaxExtent);
+	printf("%s%d\n", "Caret Slope Rise: ", font->hhea->caretSlopeRise);
+	printf("%s%d\n", "Caret Slope Run: ", font->hhea->caretSlopeRun);
+	printf("%s%d\n", "Caret Offset: ", font->hhea->caretOffset);
+	printf("%s%d\n", "Res 1: ", font->hhea->res1);
+	printf("%s%d\n", "Res 2: ", font->hhea->res2);
+	printf("%s%d\n", "Res 3: ", font->hhea->res3);
+	printf("%s%d\n", "Res 4: ", font->hhea->res4);
+	printf("%s%d\n", "Metric Data Offset: ", font->hhea->metricDataOffset);
+	printf("%s%d\n", "Number of H Metrics: ", font->hhea->numberOfHMetrics);
+}
+
 Font *fontParse(char *fontPath) {
 
 	Font *font = (Font *) malloc(sizeof(Font));
@@ -170,9 +192,11 @@ Font *fontParse(char *fontPath) {
 
 	font->head = parseHEAD(font, &index);
 	font->maxp = parseMAXP(font, &index);
+	font->hhea = parseHHEA(font, &index);
 
 	printHEAD(font);
 	printMAXP(font);
+	printHHEA(font);
 
 	return font;
 }
