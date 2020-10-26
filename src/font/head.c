@@ -5,7 +5,7 @@ head *parseHEAD(Font *font, int *index) {
     TableDirectory *dir = getTableDirFromTag(font, "head");
 
     if (dir == NULL) {
-        printf("%s\n", "Error reading HEAD table directory");
+        printf("%s\n", "Error reading head table directory");
         exit(EXIT_FAILURE);
     }
 

@@ -195,6 +195,7 @@ Font *fontParse(char *fontPath) {
 	font->hhea = parseHHEA(font, &index);
 	font->hmtx = parseHMTX(font, &index, font->hhea->numberOfHMetrics, 
 										 font->maxp->numGlyphs);
+	font->loca = parseLOCA(font, &index, font->head->indexToLocFormat, font->maxp->numGlyphs);
 
 #if 1
 	printHEAD(font);

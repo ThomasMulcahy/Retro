@@ -6,7 +6,7 @@ hmtx *parseHMTX(Font *font, int *index, uint16 numberOfHMetrics, uint16 numGlyph
       TableDirectory *dir = getTableDirFromTag(font, "hmtx");
 
     if (dir == NULL) {
-        printf("%s\n", "Error reading HEAD table directory");
+        printf("%s\n", "Error reading hmtx table directory");
         exit(EXIT_FAILURE);
     }
 

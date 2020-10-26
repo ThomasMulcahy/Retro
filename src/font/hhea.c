@@ -5,7 +5,7 @@ hhea *parseHHEA(Font *font, int *index) {
     TableDirectory *dir = getTableDirFromTag(font, "hhea");
 
     if (dir == NULL) {
-        printf("%s\n", "Error reading HEAD table directory");
+        printf("%s\n", "Error reading hhea table directory");
         exit(EXIT_FAILURE);
     }
 

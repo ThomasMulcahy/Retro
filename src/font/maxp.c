@@ -5,7 +5,7 @@ maxp *parseMAXP(Font *font, int *index) {
     TableDirectory *dir = getTableDirFromTag(font, "maxp");
 
     if (dir == NULL) {
-        printf("%s\n", "Error reading HEAD table directory");
+        printf("%s\n", "Error reading maxp table directory");
         exit(EXIT_FAILURE);
     }
 
