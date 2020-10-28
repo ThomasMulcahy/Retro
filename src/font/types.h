@@ -105,10 +105,22 @@ typedef struct _glyf {
     } simpleGlyphTable;
 
     struct {
-        uint16 flags;
-        uint16 glyphIndex;
-        int16 arg1;
-        int16 arg2;
+        uint16 numComps;
+
+        struct {
+            uint16 flags;
+            uint16 glyphIndex;
+            int16 arg1;
+            int16 arg2;
+            float xscale;
+            float yscale;
+            float scale01;
+            float scale10;
+            int16 xtranslate;
+            int16 ytranslate;
+            uint16 point1;
+            uint16 point2;
+        } *compGlyphs;
     } compGlyph;
 } glyf;
 

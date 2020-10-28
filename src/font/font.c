@@ -269,6 +269,7 @@ Font *fontParse(char *fontPath) {
 										 font->maxp->numGlyphs);
 	font->loca = parseLOCA(font, &index, font->head->indexToLocFormat, font->maxp->numGlyphs);
 	font->OS2 = parseOS2(font, &index);
+	font->glyf = parseGLYF(font, &index);
 
 #if 1
 	printHEAD(font);
