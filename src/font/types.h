@@ -38,6 +38,40 @@
 #define UNSCALED_COMPONENT_OFFSET 0x1000
 #define RESERVED_COMP 0xE010
 
+typedef struct _Format_0 {
+    uint16 length;
+    uint16 language;
+    uint8 glyphIdArray[256];
+} Format_0;
+
+typedef struct _Format_4 {
+    uint16 length;
+    uint16 language;
+    uint16 segCountX2;
+    uint16 searchRange;
+    uint16 entrySelector;
+    uint16 rangeShift;
+    uint16 *endCode; // Size: segCount
+    uint16 reservePad;
+    uint16 *startCode; // Size: segCount
+    int16 *idDelta; //Size: segCount
+    uint16 *idRangeOffset; // Size: segCount
+    uint16 *glyphIdArray; // Arbitrary size
+} Format_4;
+
+typedef struct _Format_12 {
+    uint16 reserved;
+    uint32 length;
+    uint32 language;
+    uint32 numGroups;
+
+    struct SequentialMapGroup {
+        uint32 startCharCode;
+        uint32 endCharCode;
+        uint32 startGlyphID;
+    } *groups; //Size: numGroups
+} Format_12;
+
 typedef struct _EncodingRecord {
     uint16 platformID;
     uint16 encodingID;
@@ -45,40 +79,9 @@ typedef struct _EncodingRecord {
 
     uint16 format;
 
-    union {
-        uint16 length;
-        uint16 language;
-        uint8 glyphIdArray[256];
-    } Format_0;
-
-    // Currently we are only interested in Format 0, Format 4 and Format 12
-    union {
-        uint16 length;
-        uint16 language;
-        uint16 segCountX2;
-        uint16 searchRange;
-        uint16 entrySelector;
-        uint16 rangeShift;
-        uint16 *endCode; // Size: segCount
-        uint16 reservePad;
-        uint16 *startCode; // Size: segCount
-        int16 *idDelta; //Size: segCount
-        uint16 *idRangeOffset; // Size: segCount
-        uint16 *glyphIdArray; // Arbitrary size
-    } Format_4;
-
-    union {
-        uint16 reserved;
-        uint32 length;
-        uint32 language;
-        uint32 numGroups;
-
-        struct SequentialMapGroup {
-            uint32 startCharCode;
-            uint32 endCharCode;
-            uint32 startGlyphID;
-        }* groups; //Size: numGroups
-    } Format_12;
+    Format_0 *format_0;
+    Format_4 *format_4;
+    Format_12 *format_12;
 } EncodingRecord;
 
 typedef struct _cmap {

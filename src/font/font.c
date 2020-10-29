@@ -157,7 +157,7 @@ static void printMAXP(Font *font) {
 	printf("%s%d\n", "Max Component Depth: ", font->maxp->maxComponentDepth);
 }
 
-void printHHEA(Font *font) {
+static void printHHEA(Font *font) {
 	printf("%s\n", "HHEA");
 	printf("%s%d\n", "Major Version: ", font->hhea->majorVersion);
 	printf("%s%d\n", "Minor Version: ", font->hhea->minorVersion);
@@ -179,7 +179,7 @@ void printHHEA(Font *font) {
 	printf("%s%d\n", "Number of H Metrics: ", font->hhea->numberOfHMetrics);
 }
 
-void printOS2(Font *font) {
+static void printOS2(Font *font) {
 	printf("%s\n", "OS/2");
 	printf("%s%d\n", "Version: ", font->OS2->version);
 	printf("%s%d\n", "xAvgCharWidth: ", font->OS2->xAvgCharWidth);
@@ -251,6 +251,12 @@ void printOS2(Font *font) {
     }
 }
 
+static void printCMAP(Font *font) {
+		printf("%s\n", "CMAP");
+		printf("%d\n", font->cmap->version);
+		printf("%d\n", font->cmap->numTables);
+}
+
 Font *fontParse(char *fontPath) {
 
 	Font *font = (Font *) malloc(sizeof(Font));
@@ -270,12 +276,14 @@ Font *fontParse(char *fontPath) {
 	font->loca = parseLOCA(font, &index, font->head->indexToLocFormat, font->maxp->numGlyphs);
 	font->OS2 = parseOS2(font, &index);
 	font->glyf = parseGLYF(font, &index);
+	font->cmap = parseCMAP(font, &index, font->maxp->numGlyphs);
 
 #if 1
 	printHEAD(font);
 	printMAXP(font);
 	printHHEA(font);
 	printOS2(font);
+	printCMAP(font);
 #endif
 
 	return font;

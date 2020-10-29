@@ -16,7 +16,7 @@ typedef struct _UniformsIn {
     matrix_float4x4 orthoMatrix;
 } UniformsIn;
 
-matrix_float4x4 createOrthographicMatrix(float left, float right, float top, float bottom, float near, float far) {
+static matrix_float4x4 createOrthographicMatrix(float left, float right, float top, float bottom, float near, float far) {
     return (matrix_float4x4) {
         .columns[0] = { 2.0f / (right - left), 0.0f, 0.0f, 0.0f },
         .columns[1] = { 0.0f, 2.0f / (top - bottom), 0.0f, 0.0f },

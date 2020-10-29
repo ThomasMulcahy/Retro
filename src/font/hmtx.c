@@ -1,6 +1,5 @@
 #include "font.h"
 #include "types.h"
-#include <stdlib.h>
 
 hmtx *parseHMTX(Font *font, int *index, uint16 numberOfHMetrics, uint16 numGlyphs) {
       TableDirectory *dir = getTableDirFromTag(font, "hmtx");

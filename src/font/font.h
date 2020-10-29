@@ -51,7 +51,7 @@ int32 getInt32(char *buffer, int *index);
 int64 getInt64(char *buffer, int *index);
 uint32 tagToUInt32(char *tag);
 
-cmap *parseCMAP(Font *font, int *index);
+cmap *parseCMAP(Font *font, int *index, int numGlyphs);
 glyf *parseGLYF(Font *font, int *index);
 head *parseHEAD(Font *font, int *index);
 hhea *parseHHEA(Font *font, int *index);
