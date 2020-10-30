@@ -9,7 +9,7 @@ head *parseHEAD(Font *font, int *index) {
         exit(EXIT_FAILURE);
     }
 
-    head *head = malloc(sizeof(head));
+    head *head = mallocate(sizeof(head), 1, "HEAD struct");
     seek(index, dir->offset);
     head->majorVersion = getUInt16(font->fontBuffer, index);
     head->minorVersion = getUInt16(font->fontBuffer, index);

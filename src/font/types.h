@@ -59,17 +59,19 @@ typedef struct _Format_4 {
     uint16 *glyphIdArray; // Arbitrary size
 } Format_4;
 
+typedef struct _SequentialMapGroup {
+        uint32 startCharCode;
+        uint32 endCharCode;
+        uint32 startGlyphID;
+} SequentialMapGroup;
+
 typedef struct _Format_12 {
     uint16 reserved;
     uint32 length;
     uint32 language;
     uint32 numGroups;
 
-    struct SequentialMapGroup {
-        uint32 startCharCode;
-        uint32 endCharCode;
-        uint32 startGlyphID;
-    } *groups; //Size: numGroups
+    SequentialMapGroup *groups; //Size: numGroups
 } Format_12;
 
 typedef struct _EncodingRecord {
@@ -91,6 +93,33 @@ typedef struct _cmap {
     struct _EncodingRecord *encodingRecords;    
 } cmap;
 
+typedef struct _SimpleGlyph {
+    uint16 *endPtsOfContours; //Size: numberOfContours
+    uint8 *flags; //Size: numPoints + 1
+    int16 *xCoordinates; //Size: numPoints + 1
+    int16 *yCoordinates; //Size; numPoints + 1
+} SimpleGlyph;
+
+typedef struct _CompGlyph {
+    uint16 flags;
+    uint16 glyphIndex;
+    int16 arg1;
+    int16 arg2;
+    float xscale;
+    float yscale;
+    float scale01;
+    float scale10;
+    int16 xtranslate;
+    int16 ytranslate;
+    uint16 point1;
+    uint16 point2;
+} CompGlyph;
+
+typedef struct _CompGlyphArray {
+    CompGlyph *comps;
+    uint16 numComps;
+} CompGlyphArray;
+
 typedef struct _glyf {
     int16 numberOfContours;
     int16 xMin;
@@ -98,34 +127,16 @@ typedef struct _glyf {
     int16 xMax;
     int16 yMax;
 
-    struct {
-        uint16 *endPtsOfContours; //Size: numberOfContours
-        uint16 instructionLength;
-        uint8 *instructions; //Size: instructionLength
-        uint8 *flags; //Size: numPoints + 1
-        int16 *xCoordinates; //Size: numPoints + 1
-        int16 *yCoordinates; //Size; numPoints + 1
-    } simpleGlyphTable;
+    SimpleGlyph *simpleGlyph;
+    CompGlyphArray *compGlyphArray;
 
-    struct {
-        uint16 numComps;
-
-        struct {
-            uint16 flags;
-            uint16 glyphIndex;
-            int16 arg1;
-            int16 arg2;
-            float xscale;
-            float yscale;
-            float scale01;
-            float scale10;
-            int16 xtranslate;
-            int16 ytranslate;
-            uint16 point1;
-            uint16 point2;
-        } *compGlyphs;
-    } compGlyph;
+    uint16 instructionLength;
+    uint8 *instructions; //Size: instructionLength
 } glyf;
+
+typedef struct _GlyphTable {
+    glyf *glyfs; //Size: numGlyphs
+} GlyphTable;
 
 typedef struct _head {
     uint16 majorVersion;
@@ -169,11 +180,13 @@ typedef struct _hhea {
     uint16 numberOfHMetrics;
 } hhea;
 
-typedef struct _hmtx {
-    struct LongHorMetrix {
+typedef struct _LongHorMetric {
         uint16 advanceWidth;
         int16 lsb;
-    } *hMetrics; //Size: noOfHMetrics
+} LongHorMetric; //Size: noOfHMetrics
+
+typedef struct _hmtx {
+    LongHorMetric *hMetrics; //Size: noOfHMetrics
     int16 *leftSideBearings; //Size: numGlyphs * nnoOfHMetrics
 } hmtx;
 

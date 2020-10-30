@@ -1,7 +1,7 @@
 TARGET=retro
 CC=clang
 CFLAGS=-std=c99
-DEBUG_FLAGS=-Wall -Wextra -g
+DEBUG_FLAGS=-Wall -Wextra -g -DDEBUG=1
 OBJC_FLAGS=-lobjc -framework Cocoa -framework Metal -framework MetalKit -framework QuartzCore
 
 BUILD_DIR=build

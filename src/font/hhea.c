@@ -9,7 +9,7 @@ hhea *parseHHEA(Font *font, int *index) {
         exit(EXIT_FAILURE);
     }
 
-    hhea *hhea = malloc(sizeof(hhea));
+    hhea *hhea = mallocate(sizeof(head), 1, "HHEA struct");
     seek(index, dir->offset);
     hhea->majorVersion = getUInt16(font->fontBuffer, index);
     hhea->minorVersion = getUInt16(font->fontBuffer, index);

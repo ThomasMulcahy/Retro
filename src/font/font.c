@@ -261,12 +261,9 @@ Font *fontParse(char *fontPath) {
 
 	Font *font = (Font *) malloc(sizeof(Font));
 	int index = 0;
-	font->fontBuffer = readFontFile(fontPath);
+	font->fontBuffer = platformReadFileBytesToBuffer(fontPath);
 	font->offsetTable = parseOffsetTable(font, &index);
 	font->tableDirs = parseTableDirs(font, &index);
-
-	printOffsetTable(font);
-	printTableDirs(font);
 
 	font->head = parseHEAD(font, &index);
 	font->maxp = parseMAXP(font, &index);
@@ -275,10 +272,13 @@ Font *fontParse(char *fontPath) {
 										 font->maxp->numGlyphs);
 	font->loca = parseLOCA(font, &index, font->head->indexToLocFormat, font->maxp->numGlyphs);
 	font->OS2 = parseOS2(font, &index);
-	font->glyf = parseGLYF(font, &index);
+	font->glyphTable = parseGLYF(font, &index, font->maxp, font->loca, font->head);
 	font->cmap = parseCMAP(font, &index, font->maxp->numGlyphs);
 
-#if 1
+#if 0
+	printOffsetTable(font);
+	printTableDirs(font);
+
 	printHEAD(font);
 	printMAXP(font);
 	printHHEA(font);
@@ -305,22 +305,4 @@ TableDirectory *getTableDirFromTag(Font *font, char *tag) {
 	}
 
 	return NULL;
-}
-
-char *readFontFile(char *path) {
-	FILE *file = fopen(path, "rb");
-    if (file == NULL) {
-        printf("%s%s\n", "Error reading file: ", path);
-        exit(EXIT_FAILURE);
-    }
-
-    fseek(file, 0L, SEEK_END);
-    int size = ftell(file);
-    fseek(file, 0L, SEEK_SET);
-
-    char *result = (char *)malloc(sizeof(char) * size);
-    int bytesRead = fread(result, sizeof(char), size, file);
-    result[bytesRead] = '\0';
-
-    return result;
 }

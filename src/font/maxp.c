@@ -9,7 +9,7 @@ maxp *parseMAXP(Font *font, int *index) {
         exit(EXIT_FAILURE);
     }
 
-    maxp *maxp = malloc(sizeof(maxp));
+    maxp *maxp = mallocate(sizeof(maxp), 1, "MAXP struct");
     seek(index, dir->offset);
     maxp->version = getUInt32(font->fontBuffer, index);
     maxp->numGlyphs = getUInt16(font->fontBuffer, index);

@@ -9,7 +9,7 @@ OS2 *parseOS2(Font *font, int *index) {
         exit(EXIT_FAILURE);
     }
 
-    OS2 *OS2 = malloc(sizeof(OS2));
+    OS2 *OS2 = mallocate(sizeof(OS2), 1, "OS/2 struct");
     seek(index, dir->offset);
 
     OS2->version = getUInt16(font->fontBuffer, index);

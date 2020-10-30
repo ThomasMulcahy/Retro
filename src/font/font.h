@@ -2,6 +2,7 @@
 #define FONT_H
 
 #include "types.h"
+#include "../platform/platform_util.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,7 +32,7 @@ typedef struct _Font {
 
     // Required tables
     cmap *cmap;
-    glyf *glyf;
+    GlyphTable *glyphTable;
     head *head;
     hhea *hhea;
     hmtx *hmtx;
@@ -52,7 +53,7 @@ int64 getInt64(char *buffer, int *index);
 uint32 tagToUInt32(char *tag);
 
 cmap *parseCMAP(Font *font, int *index, int numGlyphs);
-glyf *parseGLYF(Font *font, int *index);
+GlyphTable *parseGLYF(Font *font, int *index, maxp *maxp, loca *loca, head *head);
 head *parseHEAD(Font *font, int *index);
 hhea *parseHHEA(Font *font, int *index);
 hmtx *parseHMTX(Font *font, int *index, uint16 numberOfHMetrics, uint16 numGlyphs);
@@ -63,11 +64,5 @@ OS2 *parseOS2(Font *font, int *index);
 Font *fontParse(char *fontPath);
 void fontDestroy(Font *font);
 TableDirectory *getTableDirFromTag(Font *font, char *tag);
-
-/* 
- * TODO: This really needs to be in the platform layer as we interact with the
- * underlying OS. Although, this currently avoids a circular dependency.
- */
-char *readFontFile(char *path);
 
 #endif

@@ -9,7 +9,7 @@ loca *parseLOCA(Font *font, int *index, int16 indexToLocFormat, uint16 numGlyphs
         exit(EXIT_FAILURE);
     }
 
-    loca *loca = malloc(sizeof(loca));
+    loca *loca = mallocate(sizeof(loca), 1, "LOCA struct");
     seek(index, dir->offset);
 
     if (indexToLocFormat == 0) {

@@ -1,6 +1,8 @@
 #import "platform.h"
+#import "platform_util.h"
 #import <stdio.h>
 #import <stdlib.h>
+#import <string.h>
 
 #import <Cocoa/Cocoa.h>
 #import <Foundation/Foundation.h>
@@ -48,10 +50,6 @@ static matrix_float4x4 createOrthographicMatrix(float left, float right, float t
     - (void)mtkView:(MTKView*)view drawableSizeWillChange:(CGSize)size {
         frameWidth = size.width;
         frameHeight = size.height;
-    }
-
-    - (void)applicationDidFinishLaunching:(NSNotification *)notification {
-
     }
 
     - (void)drawInMTKView:(MTKView*)view {
@@ -229,6 +227,43 @@ char *platformReadFileToBuffer(char *path) {
     char *result = (char *)malloc(sizeof(char) * size);
     int bytesRead = fread(result, sizeof(char), size, file);
     result[bytesRead] = '\0';
+
+    return result;
+}
+
+char *platformReadFileBytesToBuffer(char *path) {
+    FILE *file = fopen(path, "rb");
+    if (file == NULL) {
+        printf("%s%s\n", "Error reading file: ", path);
+        exit(EXIT_FAILURE);
+    }
+
+    fseek(file, 0L, SEEK_END);
+    int size = ftell(file);
+    fseek(file, 0L, SEEK_SET);
+
+    char *result = (char *)malloc(sizeof(char) * size);
+    int bytesRead = fread(result, sizeof(char), size, file);
+    result[bytesRead] = '\0';
+
+    return result;
+}
+
+void *mallocate(size_t size, size_t count, char *label) {
+    void *result = malloc(size * count);
+
+    if (!result) {
+        if (strlen(label) > 0)
+            printf("%s%s\n","Unable to allocate memory for: ", label);
+        else
+            printf("%s\n","Unable to allocate memory!");
+
+        exit(EXIT_FAILURE);
+    }
+
+#if DEBUG
+    printf("%s%s%s%lu\n", "Allocating memory for: ", label, " Of Size: ", size * count);
+#endif
 
     return result;
 }
