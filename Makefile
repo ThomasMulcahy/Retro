@@ -11,13 +11,11 @@ SRC_FONT_DIR=$(SRC_DIR)/font
 
 SOURCES=$(wildcard $(SRC_DIR)/*.c) \
 		$(wildcard $(SRC_PLATFORM_DIR)/*.c) \
-		$(wildcard $(SRC_FONT_DIR)/*.c)
 
 OBJC_SOURCES=$(wildcard $(SRC_PLATFORM_DIR)/*.m)
 
 HEADERS=$(wildcard $(SRC_DIR)/*.h) \
 		$(wildcard $(SRC_PLATFORM_DIR)/*.h) \
-		$(wildcard $(SRC_FONT_DIR)/*.h)
 
 
 all: $(TARGET) clean

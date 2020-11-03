@@ -209,7 +209,6 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement) {
     [NSApp run];
     [pool release];
 
-    fontDestroy(font);
     return EXIT_SUCCESS;
 }
 
