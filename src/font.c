@@ -62,6 +62,8 @@ static uint32 getTableOffsetFromTag(FontData* data, char *tag) {
 }
 
 Font *fontParse(char *path) {
+    Profiler *profiler = profileStart("Font parsing");
+
     Font *font = mallocate(sizeof(Font), 1, "Font struct");
     FontData *data = mallocate(sizeof(FontData), 1, "FontData struct");
     char *buffer = platformReadFileBytesToBuffer(path);
@@ -151,5 +153,7 @@ Font *fontParse(char *path) {
     }
 
     font->fontData = data;
+
+    profileEnd(profiler);
     return font;
 }

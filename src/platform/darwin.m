@@ -212,6 +212,7 @@ int platformRun(WindowOpt *winOptions, UIElement *headElement) {
     return EXIT_SUCCESS;
 }
 
+//platform_util.h
 char *platformReadFileToBuffer(char *path) {
     FILE *file = fopen(path, "r");
     if (file == NULL) {
@@ -265,4 +266,19 @@ void *mallocate(size_t size, size_t count, char *label) {
 #endif
 
     return result;
+}
+
+Profiler *profileStart(char *id) {
+    Profiler *result = mallocate(sizeof(Profiler), 1, "");
+    result->id = id;
+    result->start = clock();
+    return result;
+}
+
+void profileEnd(Profiler *profiler) {
+    profiler->end = clock();
+    profiler->diff = (double) ((profiler->end - profiler->start)/(double)CLOCKS_PER_SEC);
+
+    printf("%s%s%s%fs\n", "Profiling complete, section: ", profiler->id, " time taken: ", profiler->diff);
+    free(profiler);
 }
