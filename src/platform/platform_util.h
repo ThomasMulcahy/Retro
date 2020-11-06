@@ -18,7 +18,7 @@ char *platformReadFileBytesToBuffer(char *path);
 //Memory allocator that provides info
 void *mallocate(size_t size, size_t count, char *label);
 
-//Profiling
+//Profiling - Profiler is automatically freed on profileEnd
 Profiler *profileStart(char *id);
 void profileEnd(Profiler *profiler);
 

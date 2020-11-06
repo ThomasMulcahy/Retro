@@ -61,6 +61,121 @@ static uint32 getTableOffsetFromTag(FontData* data, char *tag) {
     return 0;
 }
 
+//See here for glyph parsing inspiration: https://github.com/dluco/ttf/blob/master/parse/parse.c
+static void parseSimpleGlyph(Glyph *glyph, char *buffer, int *index) {
+    SimpleGlyph *simpleGlyph = mallocate(sizeof(SimpleGlyph), 1, "");
+    
+    simpleGlyph->endPtsOfContours = mallocate(sizeof(uint16_t), glyph->numberOfContours, "");
+    for (int i = 0; i < glyph->numberOfContours; i++) {
+        simpleGlyph->endPtsOfContours[i] = READ_UINT16(buffer, index);
+    }
+
+    int numPoints = simpleGlyph->endPtsOfContours[glyph->numberOfContours - 1] + 1;
+
+    simpleGlyph->flags = mallocate(sizeof(uint8), numPoints, "");
+    for (int i = 0; i < numPoints; i++) {
+        simpleGlyph->flags[i] = READ_UINT8(buffer, index);
+
+        if ((simpleGlyph->flags[i] & REPEAT_FLAG) != 0) {
+            uint8 repeats = READ_UINT8(buffer, index);
+            for (int j = 0; j < repeats; j++) {
+                simpleGlyph->flags[i + j] = simpleGlyph->flags[i];
+            }
+            i += repeats;
+        }
+    }
+
+    simpleGlyph->xCoordinates = mallocate(sizeof(int16), numPoints, "");
+    int16 x = 0;
+    for (int i = 0; i < numPoints; i++) {
+        if ((simpleGlyph->flags[i] & X_IS_SAME_OR_POSITIVE_X_SHORT_VECTOR) != 0) {
+            if ((simpleGlyph->flags[i] & X_SHORT_VECTOR) != 0) {
+                x += (int16) READ_INT8(buffer, index);
+            }
+        } else {
+            if ((simpleGlyph->flags[i] & X_SHORT_VECTOR) != 0) {
+                x += -(int16) READ_INT8(buffer, index);
+            } else {
+                x += READ_INT16(buffer, index);
+            }
+        }
+        simpleGlyph->xCoordinates[i] = x;
+    }
+
+    simpleGlyph->yCoordinates = mallocate(sizeof(int16), numPoints, "");
+    int16 y = 0;
+    for (int i = 0; i < numPoints; i++) {
+        if ((simpleGlyph->flags[i] & Y_IS_SAME_OR_POSITIVE_Y_SHORT_VECTOR) != 0) {
+            if ((simpleGlyph->flags[i] & Y_SHORT_VECTOR) != 0) {
+                y += (int16) READ_INT8(buffer, index);
+            }
+        } else {
+            if ((simpleGlyph->flags[i] & Y_SHORT_VECTOR) != 0) {
+                y += -(int16) READ_INT8(buffer, index);
+            } else {
+                y += READ_INT16(buffer, index);
+            }
+        }
+        simpleGlyph->yCoordinates[i] = y;
+    }
+
+    glyph->simpleGlyph = simpleGlyph;
+}
+
+static void parseCompoundGlyphComponents(CompoundComponent *component, char *buffer, int *index) {
+    component->flags = READ_UINT16(buffer, index);
+    component->glyphIndex = READ_UINT16(buffer, index);
+
+    if (component->flags & ARG_1_AND_2_ARE_WORDS) {
+        component->arg1 = READ_INT16(buffer, index);
+        component->arg2 = READ_INT16(buffer, index);
+    } else {
+        component->arg1 = (int16) READ_INT8(buffer, index);
+        component->arg2 = (int16) READ_INT8(buffer, index);
+    }
+
+    if (component->flags & ARGS_ARE_XY_VALUES) {
+        component->xtranslate = component->arg1;
+        component->ytranslate = component->arg2;
+    } else {
+        component->point1 = (uint16) component->arg1;
+        component->point2 = (uint16) component->arg2;
+    }
+
+    if (component->flags & WE_HAVE_SCALE) {
+        component->xscale = component-> yscale = (float) READ_INT16(buffer, index) / (float) 0x4000;
+    } else if (component->flags & WE_HAVE_AN_X_AND_Y_SCALE) {
+        component->xscale =  (float) READ_INT16(buffer, index) / (float) 0x4000;
+        component->yscale =  (float) READ_INT16(buffer, index) / (float) 0x4000;
+    } else if (component->flags & WE_HAVE_A_TWO_BY_TWO) {
+        component->xscale =  (float) READ_INT16(buffer, index) / (float) 0x4000;
+        component->scale01 =  (float) READ_INT16(buffer, index) / (float) 0x4000;
+        component->scale10 =  (float) READ_INT16(buffer, index) / (float) 0x4000;
+        component->yscale =  (float) READ_INT16(buffer, index) / (float) 0x4000;
+    }
+}
+ 
+static void parseCompoundGlyph(Glyph *glyph, char *buffer, int *index) {
+
+    CompoundGlyph *compoundGlyph = mallocate(sizeof(CompoundGlyph), 1, "");
+
+    compoundGlyph->components = malloc(sizeof(CompoundComponent) * 1);
+    do {
+        CompoundComponent *reallocComp = (CompoundComponent *) realloc(compoundGlyph->components, sizeof(*compoundGlyph->components) * (compoundGlyph->numComps + 1));
+        if (!compoundGlyph->components) {
+            printf("%s\n", "Error reallocating components array");
+            exit(EXIT_FAILURE);
+        } else {
+            compoundGlyph->components = reallocComp;
+        }
+
+        parseCompoundGlyphComponents(&compoundGlyph->components[compoundGlyph->numComps], buffer, index);
+        compoundGlyph->numComps++;
+    } while(compoundGlyph->components && (compoundGlyph->components[compoundGlyph->numComps + 1].flags & MORE_COMPONENTS));
+
+    glyph->compoundGlyph = compoundGlyph;
+}
+
 Font *fontParse(char *path) {
     Profiler *profiler = profileStart("Font parsing");
 
@@ -152,8 +267,34 @@ Font *fontParse(char *path) {
         data->hMetrics[i].lsb = READ_INT16(buffer, &index);
     }
 
-    font->fontData = data;
+    //glyf
+    Glyph *glyphs = mallocate(sizeof(Glyph), data->numGlyphs, "Glyph array");
+    for (int i = 0; i < data->numGlyphs; i++) {
+        Glyph *glyph = &glyphs[i];
 
+        if (data->offsets[i + 1] - data->offsets[i] == 0) {
+            continue;
+        }
+
+        SEEK(&index, getTableOffsetFromTag(data, "glyf") + data->offsets[i]);
+        glyph->numberOfContours = READ_INT16(buffer, &index);
+        glyph->xMin = READ_INT16(buffer, &index);
+        glyph->yMin = READ_INT16(buffer, &index);
+        glyph->xMax = READ_INT16(buffer, &index);
+        glyph->yMax = READ_INT16(buffer, &index);
+
+        if (glyph->numberOfContours == 0) {
+        } else if(glyph[i].numberOfContours > 0) {
+            parseSimpleGlyph(glyph, buffer, &index);
+        } else {
+            parseCompoundGlyph(glyph, buffer, &index);
+        }
+    }
+    data->glyphs = glyphs;
+    //cmap
+
+    font->fontData = data;
     profileEnd(profiler);
+    free(buffer);
     return font;
 }

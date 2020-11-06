@@ -262,7 +262,8 @@ void *mallocate(size_t size, size_t count, char *label) {
     }
 
 #if DEBUG
-    printf("%s%s%s%lu\n", "Allocating memory for: ", label, " Of Size: ", size * count);
+    if (strlen(label) > 0)
+        printf("%s%s%s%lu\n", "Allocating memory for: ", label, " Of Size: ", size * count);
 #endif
 
     return result;
@@ -279,6 +280,6 @@ void profileEnd(Profiler *profiler) {
     profiler->end = clock();
     profiler->diff = (double) ((profiler->end - profiler->start)/(double)CLOCKS_PER_SEC);
 
-    printf("%s%s%s%fs\n", "Profiling complete, section: ", profiler->id, " time taken: ", profiler->diff);
+    printf("%s%s%s%fs\n", "Profiling complete, section: [", profiler->id, "] time taken: ", profiler->diff);
     free(profiler);
 }

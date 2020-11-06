@@ -80,6 +80,8 @@ typedef struct _Glyph {
     int16 xMax;
     int16 yMax;
 
+    //TODO: Unsure if we actually need glyph instructions?
+
     SimpleGlyph *simpleGlyph;
     CompoundGlyph *compoundGlyph;
 } Glyph;
@@ -119,7 +121,7 @@ typedef struct _FontData {
     LongHorMetric *hMetrics;//Size: noOfHMetrics
 
     //glyf
-    Glyph *glyphs;
+    Glyph *glyphs; //Size: numGlyph
 
     //cmap
 
