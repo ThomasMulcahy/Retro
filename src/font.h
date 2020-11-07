@@ -91,6 +91,49 @@ typedef struct _LongHorMetric {
         int16 lsb;
 } LongHorMetric;
 
+typedef struct _SequentialMapGroup {
+    uint32 startCharCode;
+    uint32 endCharCode;
+    uint32 startGlyphID;
+} SequentialMapGroup;
+
+typedef struct _CMAPSubTable {
+    uint16 platformID;
+    uint16 encodingID;
+    uint32 offset;
+
+    uint16 format;
+
+    union {
+        uint16 length;
+        uint16 language;
+        uint8 glyphIdArray[256];
+    } format0;
+
+    union {
+        uint16 length;
+        uint16 language;
+        uint16 segCountX2;
+
+        uint16 *glyphIdArray;
+    } format4;
+
+    union {
+        uint16 reserved;
+        uint32 length;
+        uint32 language;
+        uint32 numGroups;
+        SequentialMapGroup *groups; //Size: numGroups
+    } format12;
+} CMAPSubTable;
+
+typedef struct _CMAP {
+    uint16 version;
+    uint16 numTables;
+
+    CMAPSubTable *subTables; //Size: numTables
+} CMAP;
+
 typedef struct _FontData {
     //Font header
     uint32 sfntVersion;
@@ -124,7 +167,7 @@ typedef struct _FontData {
     Glyph *glyphs; //Size: numGlyph
 
     //cmap
-
+    CMAP *cmap;
 } FontData;
 
 typedef struct _Font {

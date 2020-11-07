@@ -176,6 +176,109 @@ static void parseCompoundGlyph(Glyph *glyph, char *buffer, int *index) {
     glyph->compoundGlyph = compoundGlyph;
 }
 
+//See here for glyph parsing inspiration: https://github.com/dluco/ttf/blob/master/parse/parse.c
+static void parseCMAPSubTable(FontData *data, CMAPSubTable *subTable, char *buffer, int *index) {
+    subTable->format = READ_UINT16(buffer, index);
+
+    switch (subTable->format) {
+        case 0:
+            subTable->format0.length = READ_UINT16(buffer, index);
+            subTable->format0.language = READ_UINT16(buffer, index);
+
+            for (int i = 0; i < 256; i++) {
+                uint8 res = READ_UINT8(buffer, index);
+                subTable->format0.glyphIdArray[i] = (res + 256) % 256;
+            }
+            break;
+        case 4:
+            subTable->format4.length = READ_UINT16(buffer, index);
+            subTable->format4.language = READ_UINT16(buffer, index);
+
+            uint16 segCount = READ_UINT16(buffer, index) / 2;
+            subTable->format4.segCountX2 = segCount * 2;
+            SKIP(index, 6);
+
+            uint16 *endCode = mallocate(sizeof(uint16), segCount, "endCode array");
+            for (int i = 0; i < segCount; i++) {
+                endCode[i] = READ_UINT16(buffer, index);
+            }
+
+            SKIP(index, 2);
+
+            uint16 *startCode = mallocate(sizeof(uint16), segCount, "startCode array");
+            for (int i = 0; i < segCount; i++) {
+                startCode[i] = READ_UINT16(buffer, index);
+            }
+
+            uint16 *idDelta = mallocate(sizeof(uint16), segCount, "idDelta array");
+            for (int i = 0; i < segCount; i++) {
+                idDelta[i] = READ_UINT16(buffer, index);
+            }
+
+            uint16 *idRangeOffset = mallocate(sizeof(uint16), segCount, "idRangeOffset array");
+            for (int i = 0; i < segCount; i++) {
+                idRangeOffset[i] = READ_UINT16(buffer, index);
+            }
+
+            subTable->format4.glyphIdArray = mallocate(sizeof(uint16), data->numGlyphs, "glyphIdArray array");
+
+            int prevPos = *index;
+            for (int i = 0; i < segCount; i++) {
+                uint16_t start = startCode[i];
+                uint16_t end = endCode[i];
+                uint16_t delta = idDelta[i];
+                uint16_t range_offset = idRangeOffset[i];
+                
+                if (start != (65536-1) && end != (65536-1)) {
+                    int j;
+                    for (j = start; j <= end; j++) {
+                        if (range_offset == 0) {
+                            subTable->format4.glyphIdArray[(j + delta) % 65536] = j;
+                        } else {
+                            uint32_t glyph_offset = prevPos + ((range_offset/2) + (j-start) + (i-segCount))*2;
+                            SEEK(index, glyph_offset);
+                            uint16_t glyph_index = READ_UINT16(buffer, index);
+                            if (glyph_index != 0) {
+                                glyph_index = (glyph_index + delta) % 65536;
+                                if (subTable->format4.glyphIdArray[glyph_index] == 0) {
+                                    subTable->format4.glyphIdArray[glyph_index] = j;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+        case 12:
+            subTable->format12.reserved = READ_UINT16(buffer, index);
+            subTable->format12.length = READ_UINT32(buffer, index);
+            subTable->format12.language = READ_UINT32(buffer, index);
+            subTable->format12.numGroups = READ_UINT32(buffer, index);
+
+            subTable->format12.groups = mallocate(sizeof(SequentialMapGroup), subTable->format12.numGroups, "SequentialMapGroup array");
+            for (int i = 0; i <  subTable->format12.numGroups; i++) {
+                subTable->format12.groups[i].startCharCode = READ_UINT16(buffer, index);
+                subTable->format12.groups[i].endCharCode = READ_UINT16(buffer, index);
+                subTable->format12.groups[i].startGlyphID = READ_UINT16(buffer, index);
+            }
+            break;
+    }
+}
+
+static void printCMAPTable(FontData *data) {
+    printf("%s%d\n", "Version: ", data->cmap->version);
+    printf("%s%d\n", "NumTables: ", data->cmap->numTables);
+
+    for(int i = 0; i < data->cmap->numTables; i++) {
+        CMAPSubTable *subTable = &data->cmap->subTables[i];
+        printf("%s%d\n", "PlatformID: ", subTable->platformID);
+        printf("%s%d\n", "EncodingID:" , subTable->encodingID);
+        printf("%s%d\n", "Offset: ", subTable->offset);
+
+        printf("%s%d\n", "Format: ", subTable->format);
+    }
+}
+
 Font *fontParse(char *path) {
     Profiler *profiler = profileStart("Font parsing");
 
@@ -291,7 +394,34 @@ Font *fontParse(char *path) {
         }
     }
     data->glyphs = glyphs;
+
     //cmap
+    uint32 cmapOffset = getTableOffsetFromTag(data, "cmap");
+    SEEK(&index, cmapOffset);
+    CMAP *cmap = mallocate(sizeof(CMAP), 1, "CMAP struct");
+    cmap->version = READ_UINT16(buffer, &index);
+    cmap->numTables = READ_UINT16(buffer, &index);
+
+    CMAPSubTable *subTables = mallocate(sizeof(CMAPSubTable), cmap->numTables, "CMAPSubTable array");
+    for (int i = 0; i < cmap->numTables; i++) {
+        CMAPSubTable *table = &subTables[i];
+        table->platformID = READ_UINT16(buffer, &index);
+        table->encodingID = READ_UINT16(buffer, &index);
+        table->offset = READ_UINT32(buffer, &index);
+    }
+
+    for (int i = 0; i < cmap->numTables; i++) {
+        CMAPSubTable *table = &subTables[i];
+
+        SEEK(&index, cmapOffset + table->offset);
+        parseCMAPSubTable(data, table, buffer, &index);
+    }
+    cmap->subTables = subTables;
+    data->cmap = cmap;
+
+#if DEBUG
+    printCMAPTable(data);
+#endif
 
     font->fontData = data;
     profileEnd(profiler);
