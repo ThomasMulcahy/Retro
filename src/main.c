@@ -1,6 +1,9 @@
-#include "platform/platform.h"
-#include "ui.h"
+#include "platform.h"
+#include "view.h"
 
+
+//TODO: We initiate a view here on load, when we implement context dependant file loading
+//this will need to be changed.
 int main() {
 
     WindowOpt options = {
@@ -9,24 +12,5 @@ int main() {
         .height = 400
     };
 
-    UIElement root = {
-        .type = CONTAINER,
-
-        .xPos = 0,
-        .yPos = 0,
-        .width = TO_PERCENTAGE(100),
-        .height = TO_PERCENTAGE(100),
-
-        .child = &(UIElement) {
-            .type = EDITOR,
-
-            .xPos = 0,
-            .yPos = 0,
-            .width = TO_PERCENTAGE(100),
-            .height = TO_PERCENTAGE(100),
-            .color = {COL_TO_FLOAT(45), COL_TO_FLOAT(48), COL_TO_FLOAT(58)}
-        }
-    };
-
-    return platformRun(&options, &root);
+    return platformRun(&options);
 }
