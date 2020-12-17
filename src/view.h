@@ -4,7 +4,7 @@
 #include "document.h"
 
 typedef struct _FontMetrics {
-    int lineHeight;
+    double lineHeight;
 } FontMetrics;
 
 typedef struct _Cursor {
@@ -15,6 +15,11 @@ typedef struct _Cursor {
 typedef enum _ViewEvent {
     KEY_EVENT
 } ViewEvent;
+
+typedef enum _ViewMode {
+    INSERT,
+    COMMAND
+} ViewMode;
 
 //TODO: Allow Views to be split
 typedef struct _View {

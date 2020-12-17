@@ -4,6 +4,13 @@
 
 #import <Cocoa/Cocoa.h>
 
+/*
+ * TODO: This temporarily holds a reference to the View, this should not be the case
+ * as the View should be separate from the platform as the platform should only be used
+ * for rendering.
+ * 
+ * TODO: We may need multiple views for rendering i.e. status bars, this should be the parent view.
+ */
 @interface AppView : NSView <NSWindowDelegate>
 {
 	//TODO: Temp - Delete
@@ -17,9 +24,10 @@
 	- (instancetype) initWithFrame:(NSRect)frameRect {
 		[super initWithFrame:frameRect];
 
+		//TODO: Make this configurable
 		font = [NSFont fontWithName:@"Menlo" size:13];
 		FontMetrics *metrics = (FontMetrics *) malloc(sizeof(FontMetrics));
-		metrics->lineHeight = font.xHeight + font.leading;
+		metrics->lineHeight = font.ascender - font.descender + font.leading;
 
 		view = (View *) malloc(sizeof(View));
 		view->fontMetrics = metrics;
@@ -58,12 +66,15 @@
 		for (int i = 0; i < view->document->lineCount; i++) {
 			char *line = documentGetLine(view->document, i);
 			
+			//NOTE: We may need to handle this for curso position when the line has no characters?
+			if (strcmp(line, "\n") == 0 || line == NULL || strlen(line) <= 0)
+				continue;
+
 			NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, 
-										  NSFontAttributeName,[NSColor whiteColor], 
+										  NSFontAttributeName,[NSColor blackColor], 
 										  NSForegroundColorAttributeName, nil];
-			NSAttributedString * currentText = [[NSAttributedString alloc] 
-												initWithString:[NSString stringWithUTF8String:line] attributes: attributes];
-			[currentText drawAtPoint: NSMakePoint(0, i * view->fontMetrics->lineHeight)];
+			NSString *str  = [NSString stringWithCString:line encoding:NSUTF8StringEncoding];
+			[str drawAtPoint: NSMakePoint(0, i * view->fontMetrics->lineHeight) withAttributes: attributes];
 		}
 	}
 
@@ -125,12 +136,12 @@
 	}
 @end
 
-//Entry point for the Cocoa application
+//Entry point for the Cocoa application.
 int platformRun(WindowOpt *winOptions) {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSApp = [NSApplication sharedApplication];
 
-    //Create Cocoa window
+    //Create Cocoa window.
     NSRect frame = NSMakeRect(0, 0, winOptions->width, winOptions->height);
     NSUInteger style = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskResizable | NSWindowStyleMaskMiniaturizable; 
     NSRect screenRect = [[NSScreen mainScreen] frame];
@@ -151,7 +162,7 @@ int platformRun(WindowOpt *winOptions) {
 
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
-    //Create menu bar
+    //Create menu bar - we require this as from Snow Leopard this is not given to us.
 	id menubar = [[NSMenu new] autorelease];
 	id appMenuItem = [[NSMenuItem new] autorelease];
 	[menubar addItem:appMenuItem];

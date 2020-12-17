@@ -1,7 +1,6 @@
 # Retro
 Retro is a modern, lightweight code editor
 
-
 # Credits
 Developed by Thomas Mulcahy © 2020
 

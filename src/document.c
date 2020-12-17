@@ -17,8 +17,9 @@ static char *getFileNameFromPath(char *path) {
 char *documentGetLine(Document *doc, int lineNum) {
     int lineStart = doc->lineLengths[lineNum];
     int nextLineStart = doc->lineLengths[lineNum + 1];
-    if (nextLineStart > strlen(doc->buffer))
-        nextLineStart = strlen(doc->buffer);
+
+    if (nextLineStart > (int) strlen(doc->buffer))
+        nextLineStart = (int) strlen(doc->buffer);
 
     char *buffer = doc->buffer + lineStart;
     char *result = (char *) malloc(sizeof(char *) * (nextLineStart * lineStart));
@@ -39,11 +40,16 @@ Document *documentLoad(char *path) {
     int size = ftell(file);
     fseek(file, 0L, SEEK_SET);
 
-    char *buffer = (char *) malloc(sizeof(char) * size);
+    char *buffer = (char *) calloc(size, sizeof(char));
     int newSize = fread(buffer, sizeof(char), size, file);
     buffer[newSize] = '\0';
 
-    //TODO: We may want to keep this open but we will close it for now.
+    /*
+     * TODO: We may want to keep this open but we will close it for now.
+     * 
+     * NOTE: Should we keep the file open? Or should we close and open on event (i.e Save)? 
+     * This would allow other programs to edit the file.
+     */
     fclose(file);
 
     int *lineLengths = (int *) malloc(sizeof(int) * size);
