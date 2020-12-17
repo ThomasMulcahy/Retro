@@ -5,9 +5,8 @@
 #import <Cocoa/Cocoa.h>
 
 /*
- * TODO: This temporarily holds a reference to the View, this should not be the case
- * as the View should be separate from the platform as the platform should only be used
- * for rendering.
+ * TODO: This temporarily holds a reference to the View, this should be moved into
+ * it's own 'TextView' view in the future.
  * 
  * TODO: We may need multiple views for rendering i.e. status bars, this should be the parent view.
  */
@@ -28,9 +27,15 @@
 		font = [NSFont fontWithName:@"Menlo" size:13];
 		FontMetrics *metrics = (FontMetrics *) malloc(sizeof(FontMetrics));
 		metrics->lineHeight = font.ascender - font.descender + font.leading;
+		metrics->advancement = font.maximumAdvancement.width;
+
+		Cursor *cursor = (Cursor *) malloc(sizeof(Cursor));
+		cursor->line = 0;
+		cursor->col = 0;
 
 		view = (View *) malloc(sizeof(View));
 		view->fontMetrics = metrics;
+		view->cursor = cursor;
 		view->document = documentLoad("test/temp.c");
 		return self;
 	}
@@ -63,23 +68,32 @@
 		//NSSize attrSize = [currentText size];
 		//[currentText drawAtPoint:NSMakePoint(0, 0)];
 
+		//Render text
 		for (int i = 0; i < view->document->lineCount; i++) {
 			char *line = documentGetLine(view->document, i);
 			
-			//NOTE: We may need to handle this for curso position when the line has no characters?
-			if (strcmp(line, "\n") == 0 || line == NULL || strlen(line) <= 0)
-				continue;
+			//NOTE: We may need to handle this for cursor position when the line has no characters?
+			// if (strcmp(line, "\n") == 0 || line == NULL || strlen(line) <= 0)
+			// 	continue;
 
 			NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, 
-										  NSFontAttributeName,[NSColor blackColor], 
+										  NSFontAttributeName,[NSColor whiteColor], 
 										  NSForegroundColorAttributeName, nil];
 			NSString *str  = [NSString stringWithCString:line encoding:NSUTF8StringEncoding];
 			[str drawAtPoint: NSMakePoint(0, i * view->fontMetrics->lineHeight) withAttributes: attributes];
 		}
+
+		//Render cursor
+		NSRect cursorRect = NSMakeRect(view->cursor->col * view->fontMetrics->advancement, 
+									   view->cursor->line * view->fontMetrics->lineHeight, 
+									   view->fontMetrics->advancement, 
+									   view->fontMetrics->lineHeight);
+		[[NSColor whiteColor] setFill];
+		NSRectFill(cursorRect);
 	}
 
 	//Events
-	- (void) windowDidResize:(NSNotification*)notification {
+	- (void) windowDidResize:(NSNotification*) notification {
 		
 	}
 
@@ -128,7 +142,17 @@
 	}
 
 	- (void) keyDown: (NSEvent*) event {
-		
+		[super keyDown:event];
+		NSString *chars = event.charactersIgnoringModifiers;
+    	unichar aChar = [chars characterAtIndex: 0];
+
+		ViewEvent ve = {
+			.eventKind = KEY_DOWN_EVENT,
+			.code = aChar
+		};
+
+		onViewEvent(view, ve);
+		[self setNeedsDisplay:YES];
 	}
 
 	- (void) keyUp: (NSEvent*) event {
@@ -192,8 +216,9 @@ int platformRun(WindowOpt *winOptions) {
 	[window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
 
 	//Show window and run event loop 
-	[window orderFrontRegardless]; 
+	[window orderFrontRegardless];
 
+	[[NSApp mainWindow] makeKeyWindow];
     [NSApp run];
     //We reach here when the application is closed
     [pool drain];

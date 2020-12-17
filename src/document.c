@@ -1,4 +1,5 @@
 #include "document.h"
+#include <string.h>
 
 //https://stackoverflow.com/questions/7180293/how-to-extract-filename-from-path
 static char *getFileNameFromPath(char *path) {
@@ -15,71 +16,48 @@ static char *getFileNameFromPath(char *path) {
 }
 
 char *documentGetLine(Document *doc, int lineNum) {
-    int lineStart = doc->lineLengths[lineNum];
-    int nextLineStart = doc->lineLengths[lineNum + 1];
-
-    if (nextLineStart > (int) strlen(doc->buffer))
-        nextLineStart = (int) strlen(doc->buffer);
-
-    char *buffer = doc->buffer + lineStart;
-    char *result = (char *) malloc(sizeof(char *) * (nextLineStart * lineStart));
-    strncpy(result, buffer, nextLineStart - lineStart);
-
-    return result;
+    return doc->lines[lineNum];
 }
 
 Document *documentLoad(char *path) {
-    //We want to open the file for reading and appending.
-    FILE *file = fopen(path, "a+");
-    if (file == NULL) {
-        printf("%s%s\n", "Error reading file: ", path);
-        exit(EXIT_FAILURE);
+    FILE *fp;
+    char *line = NULL;
+    size_t totalLen = 0;
+    ssize_t lineLen;
+
+    fp = fopen(path, "r");
+        if (fp == NULL)
+            exit(EXIT_FAILURE);
+    
+    char **lines = calloc(256, sizeof(char *));
+    for (int i = 0; i < 256; i++) {
+        lines[i] = calloc(256, sizeof(char));
     }
 
-    fseek(file, 0L, SEEK_END);
-    int size = ftell(file);
-    fseek(file, 0L, SEEK_SET);
-
-    char *buffer = (char *) calloc(size, sizeof(char));
-    int newSize = fread(buffer, sizeof(char), size, file);
-    buffer[newSize] = '\0';
-
-    /*
-     * TODO: We may want to keep this open but we will close it for now.
-     * 
-     * NOTE: Should we keep the file open? Or should we close and open on event (i.e Save)? 
-     * This would allow other programs to edit the file.
-     */
-    fclose(file);
-
-    int *lineLengths = (int *) malloc(sizeof(int) * size);
     int index = 0;
-    int lineCount = 1;
-
-    while (index < newSize) {
-        char c = buffer[index++];
-        if (c == '\r') {
-            if (buffer[index] == '\n')
-                index++;
-
-            lineLengths[lineCount++] = index;
-        } else if (c == '\n') {
-            lineLengths[lineCount++] = index;
-        }
+    int *lineLengths = malloc(sizeof(int) * 256);
+    char *buffer = malloc(sizeof(char) * 256);
+    while ((lineLen = getline(&line, &totalLen, fp)) != -1) {
+        strcpy(buffer, line);
+        strcpy(lines[index], line);
+        lineLengths[index] = lineLen;
+        index++;
     }
-    lineLengths[lineCount] = newSize;
 
     Document *result = (Document *) malloc(sizeof(Document));
     result->filename = getFileNameFromPath(path);
     result->buffer = buffer;
+    result->lines = lines;
     result->lineLengths = lineLengths;
-    result->lineCount = lineCount;
+    result->lineCount = index;
     return result;
 }
 
-void documentClean(Document *doc) {
+void documentDestroy(Document *doc) {
     free(doc->filename);
-    free(doc->buffer);
+
+    //TODO: Double free?
+    free(doc->lines);
     free(doc->lineLengths);
     free(doc);
 }

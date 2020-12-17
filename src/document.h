@@ -9,6 +9,7 @@
 typedef struct _Document {
     char *filename;
     char *buffer;
+    char **lines;
     int *lineLengths;
     int lineCount;
 } Document;
@@ -17,6 +18,6 @@ char *documentGetLine(Document *doc, int lineNum);
 
 Document *documentLoad(char *path);
 
-void documentClean(Document *doc);
+void documentDestroy(Document *doc);
 
 #endif
