@@ -15,10 +15,16 @@ static char *getFileNameFromPath(char *path) {
     return fileName;
 }
 
+int isEscapeChar(char c) {
+    return c == '\a' || c == '\b' || c == '\e' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v' ||
+            c == '\\';
+}
+
 char *documentGetLine(Document *doc, int lineNum) {
     return doc->lines[lineNum];
 }
 
+//TODO: Implement different line reading to handle escape chars
 Document *documentLoad(char *path) {
     FILE *fp;
     char *line = NULL;
@@ -40,6 +46,10 @@ Document *documentLoad(char *path) {
     while ((lineLen = getline(&line, &totalLen, fp)) != -1) {
         strcpy(buffer, line);
         strcpy(lines[index], line);
+
+        if (lineLen == 1 && isEscapeChar(buffer[0]))
+            lineLen = 0;
+
         lineLengths[index] = lineLen;
         index++;
     }

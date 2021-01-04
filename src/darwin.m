@@ -142,7 +142,6 @@
 	}
 
 	- (void) keyDown: (NSEvent*) event {
-		[super keyDown:event];
 		NSString *chars = event.charactersIgnoringModifiers;
     	unichar aChar = [chars characterAtIndex: 0];
 

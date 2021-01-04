@@ -3,10 +3,10 @@
 
 #include "document.h"
 
-#define KEY_D_CODE 0x64
-#define KEY_F_CODE 0x66
+#define KEY_H_CODE 0x68
 #define KEY_J_CODE 0x6a
 #define KEY_K_CODE 0x6b
+#define KEY_L_CODE 0x6c
 
 typedef struct _FontMetrics {
     double lineHeight;

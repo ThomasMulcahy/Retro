@@ -37,19 +37,19 @@ static void moveCursorUp(View *view) {
 
 static void onKeyDown(View *view, char code) {
     switch (code) {
-        case KEY_F_CODE:
+        case KEY_J_CODE:
             moveCursorDown(view);
             break;
-        case KEY_J_CODE:
+        case KEY_K_CODE:
             moveCursorUp(view);
             break;
-        case KEY_D_CODE:
+        case KEY_H_CODE:
             if (view->cursor->col > 0)
                 view->cursor->col--;
             else
              view->cursor->col = 0;
             break;
-        case KEY_K_CODE: {
+        case KEY_L_CODE: {
             int lineLength = view->document->lineLengths[view->cursor->line];
             if (view->cursor->col < lineLength)
                 view->cursor->col++;
